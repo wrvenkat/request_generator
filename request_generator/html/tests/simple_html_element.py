@@ -1,7 +1,10 @@
 import unittest
-from ..tag import Tag
+from ..simple_html_element import SimpleHTMLElement
 
-class ElementTest(unittest.TestCase):
+class SimpleHTMLElementTest(unittest.TestCase):
+    """
+    Tests SimpleHTMLElement and by extension tests Tag.
+    """
     
     def setUp(self):
         """
@@ -9,19 +12,19 @@ class ElementTest(unittest.TestCase):
         """
 
         #HTML
-        self.html_tag = Tag(name='html')
+        self.html_tag = SimpleHTMLElement(name='html')
 
         #HEAD
-        self.head_tag = Tag(name='head')
-        self.head_text = Tag(name='text', text = "Test Document!")
+        self.head_tag = SimpleHTMLElement(name='head')
+        self.head_text = SimpleHTMLElement(name='text', text = "Test Document!")
 
-        self.title_tag = Tag(name='title')
-        self.title_text = Tag(text='Test HTML document title!')
+        self.title_tag = SimpleHTMLElement(name='title')
+        self.title_text = SimpleHTMLElement(text='Test HTML document title!')
 
-        self.meta_desc = Tag(name="meta", attrs={'name':'description','content':'Simple description text.'}, self_closing=True)
+        self.meta_desc = SimpleHTMLElement(name="meta", attrs={'name':'description','content':'Simple description text.'}, self_closing=True)
 
         #body
-        self.body_tag = Tag(name="body")
+        self.body_tag = SimpleHTMLElement(name="body")
         iframe1_attrs = {
             'src' : 'https://www.w3schools.com',
             'width' : "500",
@@ -29,46 +32,46 @@ class ElementTest(unittest.TestCase):
         }
 
         #iframe
-        self.iframe1 = Tag(name="iframe", attrs=iframe1_attrs)
+        self.iframe1 = SimpleHTMLElement(name="iframe", attrs=iframe1_attrs)
 
         #href
-        self.ahref1 = Tag(name="a", attrs={'href':'https://www.w3schools.com'})
-        self.a1_text = Tag(text="Visit W3Schools")
+        self.ahref1 = SimpleHTMLElement(name="a", attrs={'href':'https://www.w3schools.com'})
+        self.a1_text = SimpleHTMLElement(text="Visit W3Schools")
 
         #form1
         form1_attrs = {
             'action':'https:/weaweas.com/asdasd',
             'method':'post'
         }
-        self.form1 = Tag(name='form', attrs=form1_attrs)
+        self.form1 = SimpleHTMLElement(name='form', attrs=form1_attrs)
 
         #Name label
-        self.label1 = Tag(name='label', attrs={'for':'name'})
-        self.label1_text = Tag(text='Name:')
+        self.label1 = SimpleHTMLElement(name='label', attrs={'for':'name'})
+        self.label1_text = SimpleHTMLElement(text='Name:')
         #Name input field
         name_input_attrs = {
             'type'  : 'text',
             'id'    : 'name',
             'name'  : 'user_name'
         }
-        self.name_input = Tag(name="input", attrs=name_input_attrs)
+        self.name_input = SimpleHTMLElement(name="input", attrs=name_input_attrs)
 
         #email label
-        self.label2 = Tag(name='label', attrs={'for':'mail'})
-        self.label2_text = Tag(text='E-mail:')
+        self.label2 = SimpleHTMLElement(name='label', attrs={'for':'mail'})
+        self.label2_text = SimpleHTMLElement(text='E-mail:')
         email_input_attrs = {
             'type'  : 'email',
             'id'    : 'mail',
             'name'  : 'user_email'
         }
-        self.email_input = Tag(name="input", attrs=email_input_attrs)
+        self.email_input = SimpleHTMLElement(name="input", attrs=email_input_attrs)
 
         #submit button
         submit_button_attrs = {
             'type'  : 'submit',
             'value' : 'Submit'
         }
-        self.submit_button = Tag(name="input", attrs=submit_button_attrs)
+        self.submit_button = SimpleHTMLElement(name="input", attrs=submit_button_attrs)
 
         #construct the DOM tree
 
@@ -150,7 +153,7 @@ class ElementTest(unittest.TestCase):
         #print "test_b_replace_with_before"
         #print self.html_tag.generate()
 
-        get_form = Tag(name="form", attrs=get_form_attrs)
+        get_form = SimpleHTMLElement(name="form", attrs=get_form_attrs)
         self.form1.replace_with(get_form)
 
         #print "test_b_replace_with_after"
@@ -201,7 +204,7 @@ class ElementTest(unittest.TestCase):
         #print self.html_tag.generate()
 
         #wrap form1 with div
-        div_tag = Tag(name="div")
+        div_tag = SimpleHTMLElement(name="div")
         self.form1.wrap_with(div_tag)
 
         #print "test_d_wrap_with_after"
@@ -225,7 +228,7 @@ class ElementTest(unittest.TestCase):
             'action' : 'https://asdasdasdas.com',
             'method' : 'POST'
         }
-        form_temp = Tag(name="form", attrs=form_temp_attrs)
+        form_temp = SimpleHTMLElement(name="form", attrs=form_temp_attrs)
         self.form1.insert_before(form_temp)
 
         #assert the neighbors
@@ -240,7 +243,7 @@ class ElementTest(unittest.TestCase):
             'action' : 'https://asdasdasdas.com',
             'method' : 'POST'
         }
-        form_temp = Tag(name="form", attrs=form_temp_attrs)
+        form_temp = SimpleHTMLElement(name="form", attrs=form_temp_attrs)
         self.form1.insert_after(form_temp)
 
         #assert the neighbors
@@ -348,7 +351,17 @@ class ElementTest(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.body_tag.contents[my_index]
     
-    def test_l_search(self):
+    def test_l_copy(self):
+        """
+        Test SimpleHTMLElement's shallow copy = __copy__
+        """
+        form1_copy = self.form1.copy()
+        self.assertTrue(self.form1.is_equal(form1_copy))
+
+        name_input_copy = self.name_input.copy()
+        self.assertTrue(self.name_input.is_equal(name_input_copy))
+
+    def test_m_search(self):
         """
         Test the search functionality.
         """
@@ -376,7 +389,7 @@ class ElementTest(unittest.TestCase):
         
         #find_previous_siblings
         test_array = [self.label2, self.name_input, self.label1]
-        self.assertEqual(self.email_input.find_previous_siblings(_type=Tag.type.html), test_array)
+        self.assertEqual(self.email_input.find_previous_siblings(_type=SimpleHTMLElement.type.html), test_array)
 
         #find_previous_sibling
         attr = { "type" : "text" }
@@ -392,7 +405,7 @@ class ElementTest(unittest.TestCase):
 
         #find_all
         test_array = [self.a1_text, self.label1_text, self.label2_text]
-        self.assertEqual(self.body_tag.find_all(_type=Tag.type.text), test_array)
+        self.assertEqual(self.body_tag.find_all(_type=SimpleHTMLElement.type.text), test_array)
 
     def pretty_print(self):
         pretty_code = self.html_tag.generate()

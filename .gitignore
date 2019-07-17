@@ -4,6 +4,7 @@
 **/.vscode
 **/.DS_Store
 **/__pycache__
+**/request_parser
 
 *.*~
 *.org

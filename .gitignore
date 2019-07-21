@@ -3,6 +3,7 @@
 
 **/.vscode
 **/.DS_Store
+**/._.DS_Store
 **/__pycache__
 **/request_parser
 

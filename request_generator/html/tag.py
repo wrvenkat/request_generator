@@ -38,13 +38,13 @@ class Tag(object):
         #main meta data
         self.name = None
         self.attrs = {}
+        #namespace attribute. Just incase we require it.
         self.namespace = None
         self._self_closing = False
         self._type = None
 
-        #sub meta_data
-        #namespace attribute. Just incase we require it.
-        self._generator = None
+        #sub meta_data        
+        self._encoder = None
                     
         #tree info
         self._parent = None
@@ -397,11 +397,11 @@ class Tag(object):
         return self._self_closing
     
     @property    
-    def generator(self):
+    def encoder(self):
         """
-        Look up a generator for this tag.
+        Return the encoder for this tag.
         """
-        return self._generator    
+        return self._encoder    
 
     def last_descendant(self, accept_self=True):
         """

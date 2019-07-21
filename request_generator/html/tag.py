@@ -79,24 +79,24 @@ class Tag(object):
             self.parent = parent
 
         #append child to self's children
-        if child:
+        if child is not None:
             self.append(child)
         
-        if next_sibling and self._next_sibling:
+        if next_sibling is not None and self._next_sibling is not None:
             self._next_sibling._previous_sibling = next_sibling            
             next_sibling._next_sibling = self._next_sibling
             self._next_sibling = next_sibling
             next_sibling._previous_sibling = self
-        elif next_sibling and not self._next_sibling:
+        elif next_sibling is not None and not self._next_sibling is not None:
             self._next_sibling = next_sibling
             next_sibling._previous_sibling = self
         
-        if previous_sibling and self._previous_sibling:
+        if previous_sibling is not None and self._previous_sibling is not None:
             self._previous_sibling._next_sibling = previous_sibling
             previous_sibling._previous_sibling = self._previous_sibling
             previous_sibling._next_sibling = self
             self._previous_sibling = previous_sibling
-        elif previous_sibling and not self._previous_sibling:
+        elif previous_sibling is not None and not self._previous_sibling is not None:
             self._previous_sibling = previous_sibling
             previous_sibling._next_sibling = self
 
@@ -603,7 +603,7 @@ class Tag(object):
         """
         return self.find_all(*args, **kwargs)
 
-    def _get_indent(self, indent_level):
+    def get_indent(self, indent_level):
         """
         Returns indent_level number of tabs or spaces.
         """
@@ -621,7 +621,7 @@ class Tag(object):
         
         return indents
         
-    def generate_from_children(self, indent_level=0, prettify=True):
+    def generate_from_children(self, indent_level=0):
         """
         Returns code generated from children.
         """
@@ -787,7 +787,7 @@ class Tag(object):
         """
         return ''
 
-    def generate(self, indent_level=0, prettify=True):
+    def generate(self, indent_level=0):
         """
         Generates code for tree rooted at self.
 

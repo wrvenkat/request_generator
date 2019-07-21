@@ -1,5 +1,5 @@
 import unittest
-from ..simple_html import *
+from ..simple_html_elements import *
 
 class SimpleHTMLTest(unittest.TestCase):
     """

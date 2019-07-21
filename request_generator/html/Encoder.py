@@ -18,10 +18,9 @@ class Encoder:
         &, <, >, ", ', /
         """
 
+        input = cls.get_UTF8(input)
         if len(input) == 0:
             return ''
-
-        input = cls.get_UTF8(input)
 
         ampersand = cls.get_code_point('&')
         less_than = cls.get_code_point('<')
@@ -123,7 +122,6 @@ class Encoder:
         """
 
         input = cls.get_UTF8(input)
-
         if len(input) == 0:
             return ''
         
@@ -175,7 +173,6 @@ class Encoder:
         """
 
         input = cls.get_UTF8(input)
-
         if len(input) == 0:
             return ''
         

@@ -30,7 +30,7 @@ class SimpleHTMLElement(Tag):
         self.name = name
 
         #set 'text'
-        if text:
+        if text is not None:
             self.value = text
             self.name = ''
             self._type = self.type.text
@@ -113,7 +113,6 @@ class SimpleHTMLElement(Tag):
         """
 
         attr_text = ''
- 
         for attr, attr_value in self.attrs.iteritems():
             attr_text += ' '
             attr_name_text = attr
@@ -124,12 +123,10 @@ class SimpleHTMLElement(Tag):
                 # for now, we'll go with Encoder's encode for HTML.
                 attr_name_text = self.encoder.encode_for_HTML_content(attr_name_text)
                 attr_value_text = self.encoder.encode_for_HTML_attrib(attr_value_text, quoted_context=True)
-
-            attr_text += "{}=\"{}\"".format(attr_name_text, attr_value_text)
-        
+            attr_text += "{}=\"{}\"".format(attr_name_text, attr_value_text)        
         return attr_text
 
-    def generate(self, indent_level=0, prettify=True):
+    def generate(self, indent_level=0):
         """
         Generates code for tree rooted at self.
 
@@ -138,24 +135,24 @@ class SimpleHTMLElement(Tag):
         """
 
         text = ''
-        indent = self._get_indent(indent_level)
+        indent = self.get_indent(indent_level)
         #inspect self to see what type of tag were
         my_type = self._type
-        if my_type == Tag.type.cdata:
+        if my_type == SimpleHTMLElement.type.cdata:
             text = indent+"<![CDATA[{}]]>".format(self.value)
-        elif my_type == Tag.type.text:
+        elif my_type == SimpleHTMLElement.type.text:
             text = self.value
             if self.encoder is not None:
                 text = self.encoder.encode_for_HTML_content(text)
             text = indent+text
-        else:            
+        elif my_type == SimpleHTMLElement.type.html:
             attr_text = self.generate_for_attrs()
             #self-closing tags do not contain text
             if self.self_closing:
                 text = indent+"<{}{}/>".format(self.name, attr_text)
             else:
                 text = indent+"<{}{}>".format(self.name, attr_text)
-                children_text = self.generate_from_children(indent_level+1, prettify=prettify)                
+                children_text = self.generate_from_children(indent_level+1)
                 if children_text and len(children_text):
                     text += children_text+"\r\n"
                     text += indent+"</{}>".format(self.name)

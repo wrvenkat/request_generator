@@ -496,7 +496,7 @@ class Tag(object):
         setattr(clone, 'namespace', getattr(self, 'namespace'))
         setattr(clone, '_self_closing', getattr(self, '_self_closing'))
         setattr(clone, '_type', getattr(self, '_type'))        
-        setattr(clone, '_generator', getattr(self, '_generator'))
+        setattr(clone, '_encoder', getattr(self, '_encoder'))
 
         return clone
 

@@ -58,11 +58,13 @@ class Encoder:
 
         Takes,
             input = input string
+            
             quoted_context = whether output encoding needs to take place inside
-                a quoted_context or not. By default, no quoting is assumed.
+            a quoted_context or not. By default, no quoting is assumed.
+            
             single_quotes = if quoted_context is true, single_quotes when true
-                means enclosing context is inside single quotes (''). When false, it
-                means enclosing context is inside double quotes ("").
+            means enclosing context is inside single quotes (''). When false, it
+            means enclosing context is inside double quotes ("").
         """
         input = cls.get_UTF8(input)
         if len(input) == 0:

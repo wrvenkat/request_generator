@@ -23,7 +23,10 @@ class SimpleHTMLElement(Tag):
         text    = "html_text"
         cdata   = "cdata"
 
-    def __init__(self, name=None, attrs=None, text=None, cdata=None, self_closing=False, parent=None, child=None, encoder=Encoder):
+    def __init__(self, name=None, attrs=None, text=None, cdata=None, # primary data of an element
+                       self_closing=False,                           # whether <tag/> or <tag></tag>
+                       parent=None, child=None,                      # realtionships
+                       encoder=Encoder):                             # default encoding object
         super(SimpleHTMLElement, self).__init__()
             
         #tag name
@@ -126,12 +129,16 @@ class SimpleHTMLElement(Tag):
             attr_text += "{}=\"{}\"".format(attr_name_text, attr_value_text)        
         return attr_text
 
-    def generate(self, indent_level=0):
+    def generate(self, indent_level=0, encode=None):
         """
         Generates code for tree rooted at self.
 
         This is a generic implementation. Subclassing elements
         can override whenever required.
+
+        encode = A callable function that is provided by
+        the parent to perform encoding of self's 
+        SimpleHTMLElement.type.text children.
         """
 
         text = ''
@@ -142,17 +149,28 @@ class SimpleHTMLElement(Tag):
             text = indent+"<![CDATA[{}]]>".format(self.value)
         elif my_type == SimpleHTMLElement.type.text:
             text = self.value
-            if self.encoder is not None:
-                text = self.encoder.encode_for_HTML_content(text)
-            text = indent+text
-        elif my_type == SimpleHTMLElement.type.html:
+            if encode is not None and text is not None and len(text)>0:
+                    text = encode(text)
+            children_text = self.generate_from_children(indent_level+1)
+            text = indent + text
+            if children_text is not None and len(children_text) > 0:
+                text += children_text
+        elif my_type == SimpleHTMLElement.type.html or\
+             my_type == SimpleHTMLElement.type.script:
             attr_text = self.generate_for_attrs()
+            #set the encoding function depending on the type
+            #by default script types don't have any encoding
+            #for text elements
+            encode_function = None
+            if my_type == SimpleHTMLElement.type.html:
+                encode_function = Encoder.encode_for_HTML_content
             #self-closing tags do not contain text
             if self.self_closing:
                 text = indent+"<{}{}/>".format(self.name, attr_text)
             else:
                 text = indent+"<{}{}>".format(self.name, attr_text)
-                children_text = self.generate_from_children(indent_level+1)
+                children_text = self.generate_from_children(indent_level+1,
+                                                        encode=encode_function)                
                 if children_text and len(children_text):
                     text += children_text+"\r\n"
                     text += indent+"</{}>".format(self.name)

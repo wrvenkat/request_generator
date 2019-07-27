@@ -4,9 +4,30 @@ from simple_html_element import SimpleHTMLElement as Element
 Class that houses the various HTML Tags/Elements like form, iframe, input, label etc.
 """
 
+class Script(Element):
+    """
+    Creates a <script> element where the default value for the
+    type attribute is Type.javascript.
+
+    By default script elements don't have any encoding for text
+    elements
+    """
+
+    class Type:
+        javascript = "text/javascript"
+        vbscript = "text/vbscript"
+
+    def __init__(self, type=Type.javascript):
+        attrs = {
+            'type' : type
+        }
+        #no encoder for a script tag as it requires that the code be properly
+        #set in the DOM and doesn't encode during code generation.
+        super(Script, self).__init__('script', attrs=attrs, encoder=None)        
+
 class Text(Element):
     def __init__(self,text='', parent=None, child=None):
-        super(Text, self).__init__(text=text, parent=parent, child=child)        
+        super(Text, self).__init__(text=text, parent=parent, child=child)
 
 class Form(Element):
     def __init__(self,action='', method='GET', attrs=None, parent=None, child=None):
@@ -15,10 +36,10 @@ class Form(Element):
             if attrs is None:
                 attrs = {}
             
-            if 'method' not in attrs:
-                attrs['method'] = method
-            if 'action' not in attrs:
-                attrs['action'] = action
+        if 'method' not in attrs:
+            attrs['method'] = method
+        if 'action' not in attrs:
+            attrs['action'] = action
 
         super(Form, self).__init__('form', attrs=attrs, parent=parent, child=child)        
 
@@ -27,7 +48,7 @@ class IFrame(Element):
         #attrs in attrs take precedence
         if attrs is None:
             attrs = {}
-            
+        
         if 'src' not in attrs:
             attrs['src'] = src
         if 'width' not in attrs:
@@ -54,14 +75,14 @@ class Input(Element):
             if attrs is None:
                 attrs = {}
             
-            if 'name' not in attrs:
-                attrs['name'] = name
-            if 'type' not in attrs:
-                attrs['type'] = _type
-            if 'value' not in attrs:
-                attrs['value'] = value
+        if 'name' not in attrs:
+            attrs['name'] = name
+        if 'type' not in attrs:
+            attrs['type'] = _type
+        if 'value' not in attrs:
+            attrs['value'] = value
 
-        super(Input, self).__init__('input', attrs=attrs, parent=parent, child=child)        
+        super(Input, self).__init__('input', attrs=attrs, parent=parent, child=child)
 
 class AHref(Element):
     def __init__(self, href='', text='', attrs=None, parent=None):
@@ -102,6 +123,33 @@ class Label(Element):
 
         super(Label, self).__init__('label', attrs=attrs, parent=parent, child=text_child)        
 
+class Heading(Element):
+    class size:
+        level1 = 1
+        level2 = 2
+        level3 = 3
+        level4 = 4
+        level5 = 5
+        level6 = 6
+
+    def __init__(self, size=size.level3, text='', parent=None):
+        """
+        Default size is 3.
+        """
+
+        if size is None or not isinstance(size, int):
+            size = size.level3
+        _name = 'h{}'.format(size)
+
+        #since Heading represents something, it's best
+        #to have an empty place holder when no 'text'
+        #is provided
+        if text is None or len(text) == 0:
+            text = 'empty_heading_value'
+        text_child = Text(text=text)
+
+        super(Heading, self).__init__(_name, parent=parent, child=text_child)
+
 class Meta(Element):
     def __init__(self, name='', content='', attrs=None, parent=None, child=None):
         #attrs in attrs take precedence
@@ -109,10 +157,10 @@ class Meta(Element):
             if attrs is None:
                 attrs = {}
             
-            if 'name' not in attrs:
-                attrs['name'] = name
-            if 'content' not in attrs:
-                attrs['content'] = content
+        if 'name' not in attrs:
+            attrs['name'] = name
+        if 'content' not in attrs:
+            attrs['content'] = content
 
         super(Meta, self).__init__('meta', attrs=attrs, self_closing=True, parent=parent, child=child)        
 
@@ -127,9 +175,9 @@ class Title(Element):
 
 class Head(Element):
     def __init__(self, text='',parent=None, child=None):
-        if child is None:
+        if child is None and len(text)>0:
             child = Text(text=text)
-        super(Head, self).__init__('head', parent=parent, child=child)        
+        super(Head, self).__init__('head', parent=parent, child=child)
 
 class Body(Element):
     def __init__(self, parent=None, child=None):
@@ -143,6 +191,6 @@ class BR(Element):
     def __init__(self,parent=None, child=None):
         super(BR, self).__init__('br', parent=parent, child=child)        
     
-    def generate(self, indent_level=0):
+    def generate(self, indent_level=0, encode=None):
         indent = self.get_indent(indent_level)
         return indent+'<{}>'.format(self.name)

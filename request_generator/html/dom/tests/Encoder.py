@@ -11,8 +11,6 @@ class EncoderTest(unittest.TestCase):
         
         #empty input
         with self.assertRaises(TypeError):
-            Encoder.get_UTF8('')
-        with self.assertRaises(TypeError):
             Encoder.get_UTF8()
 
         #input is an str that's valid in
@@ -68,10 +66,10 @@ class EncoderTest(unittest.TestCase):
         val1 = "alert('test xss')"
         val2 = "javascript:alert(1)"
         val3 = "location.href='http://attacker.com'"
-
-        self.assertEqual(u'alert\\x28;\\x27;test\\x20;xss\\x27;\\x29;', Encoder.encode_for_JS_data_values(val1))
-        self.assertEqual(u'javascript\\x3A;alert\\x28;1\\x29;', Encoder.encode_for_JS_data_values(val2))
-        self.assertEqual(u'location\\x2E;href\\x3D;\\x27;http\\x3A;\\x2F;\\x2F;attacker\\x2E;com\\x27;', Encoder.encode_for_JS_data_values(val3))
+        
+        self.assertEqual(u'alert\\x28\\x27test\\x20xss\\x27\\x29', Encoder.encode_for_JS_data_values(val1))
+        self.assertEqual(u'javascript\\x3Aalert\\x281\\x29', Encoder.encode_for_JS_data_values(val2))
+        self.assertEqual(u'location\\x2Ehref\\x3D\\x27http\\x3A\\x2F\\x2Fattacker\\x2Ecom\\x27', Encoder.encode_for_JS_data_values(val3))
     
     def test_e_escape_for_url_parameters(self):
         """

@@ -368,8 +368,8 @@ class SimpleHTMLElementTest(unittest.TestCase):
 
         #tests __getattr__
         #als tests find, find_all by name
-        self.assertEqual(self.html_tag.body, self.body_tag)
-        self.assertEqual(self.html_tag.label, self.label1)
+        self.assertEqual(self.html_tag.body, [self.body_tag])
+        self.assertEqual(self.html_tag.label, [self.label1, self.label2])
 
         #tests find_all with attrs
         attr = { "for" : "mail" }
@@ -385,7 +385,8 @@ class SimpleHTMLElementTest(unittest.TestCase):
 
         #find_next_sibling
         attr = { "type" : "mail"}
-        self.assertEqual(self.html_tag.form.input.find_next_sibling(attrs=attr), self.email_input)
+        self.assertEqual(self.html_tag.form[0].input[0].find_next_sibling(attrs=attr),
+                         self.email_input)
         
         #find_previous_siblings
         test_array = [self.label2, self.name_input, self.label1]

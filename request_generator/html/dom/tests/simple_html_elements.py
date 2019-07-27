@@ -1,5 +1,5 @@
 import unittest
-from ..simple_html_elements import *
+from .. import simple_html_elements as HTMLDocument
 
 class SimpleHTMLTest(unittest.TestCase):
     """
@@ -17,32 +17,32 @@ class SimpleHTMLTest(unittest.TestCase):
         url_parameter_xss = "document.location=\"https:/ascsavwb.com\""
 
         #HTML
-        self.html_tag = HTML()
+        self.html_tag = HTMLDocument.HTML()
 
         #HEAD        
-        self.head_tag = Head(text = "Test Document!"+xss_attempt1)
+        self.head_tag = HTMLDocument.Head(text = "Test Document!"+xss_attempt1)
 
         #title
-        self.title_tag = Title(title='Test HTML document title!')
+        self.title_tag = HTMLDocument.Title(title='Test HTML document title!')
         #meta
         meta_attrs = {
             'name':'description',
             'content':'Simple description text.',
             'charset':'UTF-8'
         }
-        self.meta_desc = Meta(attrs=meta_attrs)
+        self.meta_desc = HTMLDocument.Meta(attrs=meta_attrs)
 
         #body
-        self.body_tag = Body()
+        self.body_tag = HTMLDocument.Body()
 
         #iframe with default width and height
         iframe1_attrs = {
             'src' : 'https://demo.testfire.net/'+html_attrib_xss1
         }        
-        self.iframe1 = IFrame(attrs=iframe1_attrs)
+        self.iframe1 = HTMLDocument.IFrame(attrs=iframe1_attrs)
 
         #href
-        self.ahref1 = AHref(href='https://demo.testfire.net/src='+url_parameter_xss
+        self.ahref1 = HTMLDocument.AHref(href='https://demo.testfire.net/src='+url_parameter_xss
                             , text='Visit Demo.TestFire')
 
         #form1
@@ -50,10 +50,10 @@ class SimpleHTMLTest(unittest.TestCase):
             'action':'https:/weaweas.com/asdasd',
             'method':'post'
         }
-        self.form1 = Form(attrs=form1_attrs)
+        self.form1 = HTMLDocument.Form(attrs=form1_attrs)
 
         #Name label
-        self.label1 = Label(text='Name:',attrs={'for':'name'})
+        self.label1 = HTMLDocument.Label(text='Name:',attrs={'for':'name'})
         
         #Name input field
         name_input_attrs = {
@@ -61,42 +61,42 @@ class SimpleHTMLTest(unittest.TestCase):
             'id'    : 'name',
             'name'  : 'user_name'
         }
-        self.name_input = Input(attrs=name_input_attrs)
+        self.name_input = HTMLDocument.Input(attrs=name_input_attrs)
 
         #email label
-        self.label2 = Label(text='E-mail:',attrs={'for':'mail'})
+        self.label2 = HTMLDocument.Label(text='E-mail:',attrs={'for':'mail'})
         email_input_attrs = {
             'type'  : 'email',
             'id'    : 'mail',
             'name'  : 'user_email'
         }
-        self.email_input = Input(attrs=email_input_attrs)
+        self.email_input = HTMLDocument.Input(attrs=email_input_attrs)
 
         #submit button
         submit_button_attrs = {
             'type'  : 'submit',
             'value' : 'Submit'
         }
-        self.submit_button = Input(attrs=submit_button_attrs)
+        self.submit_button = HTMLDocument.Input(attrs=submit_button_attrs)
 
         #construct the DOM tree
 
         #construct the form
         self.form1.append(self.label1)
         self.form1.append(self.name_input)
-        self.form1.append(BR())
+        self.form1.append(HTMLDocument.BR())
         self.form1.append(self.label2)
         self.form1.append(self.email_input)
-        self.form1.append(BR())
+        self.form1.append(HTMLDocument.BR())
         self.form1.append(self.submit_button)
 
         #construct body
-        self.body_tag.append(BR())
+        self.body_tag.append(HTMLDocument.BR())
         self.body_tag.append(self.iframe1)
-        self.test_br = BR()
+        self.test_br = HTMLDocument.BR()
         self.body_tag.append(self.test_br)
         self.body_tag.append(self.ahref1)
-        self.body_tag.append(BR())
+        self.body_tag.append(HTMLDocument.BR())
         self.body_tag.append(self.form1)
 
         #construct head
@@ -144,6 +144,12 @@ class SimpleHTMLTest(unittest.TestCase):
 
         #assert that submit input tag's next is None
         self.assertIsNone(self.submit_button.next)
+
+    def test_b_file_input(self):
+
+        file_input = HTMLDocument.Input(name='file1', _type=HTMLDocument.Input.Type.file,value='1')
+        file_input_html = u'<input type="file" name="file1" value="1"></input>'
+        self.assertEqual(file_input_html, file_input.generate())
 
     def test_z_generate(self):
         print "\nSave the below HTML as a .html file and open in any browser."

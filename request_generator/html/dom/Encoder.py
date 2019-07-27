@@ -146,7 +146,7 @@ class Encoder:
                     (char_codepoint >= caps_a_code_point and char_codepoint <= caps_z_code_point) or
                     (char_codepoint >= zero_code_point and char_codepoint <= nine_code_point) and 
                     char_codepoint < 256):
-                    replacement = unicode('\\x{:02X};'.format(char_codepoint))
+                    replacement = unicode('\\x{:02X}'.format(char_codepoint))
 
             encoded_output += replacement
        
@@ -232,7 +232,8 @@ class Encoder:
             input_length = len(str(input))
         
         if input_length == 0:
-            raise TypeError("get_UTF8() takes atleast one argument. (0 given)")
+            return u''
+            #raise TypeError("get_UTF8() takes atleast one argument. (0 given)")
 
         #if the input is not of UNICODE type,
         #then we transform it to unicode

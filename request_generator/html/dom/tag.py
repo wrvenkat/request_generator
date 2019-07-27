@@ -401,7 +401,14 @@ class Tag(object):
         """
         Return the encoder for this tag.
         """
-        return self._encoder    
+        return self._encoder
+    
+    @encoder.setter
+    def encoder(self, encoder):
+        """
+        Sets the encoder property.
+        """
+        self._encoder = encoder
 
     def last_descendant(self, accept_self=True):
         """
@@ -590,7 +597,7 @@ class Tag(object):
         #    return self.find(tag_name)
         # We special case contents to avoid recursion.
         if not tag_name.startswith("_") and not tag_name=="contents":
-            return self.find(tag_name)
+            return self.find_all(tag_name)
         raise AttributeError(
             "'%s' object has no attribute '%s'" % (self.__class__, tag_name))
     
@@ -620,20 +627,7 @@ class Tag(object):
             indent_level -= 1
         
         return indents
-        
-    def generate_from_children(self, indent_level=0):
-        """
-        Returns code generated from children.
-        """
-
-        text = ''
-        for child in self.children:
-            child_text = child.generate(indent_level)
-            if child_text and len(child_text):
-                text += "\r\n"+child_text
-            child_text = ''
-        return text
-    
+          
     #Search methods    
     def find(self, name=None, attrs={}, recursive=True, text=None, _type=None,
              **kwargs):
@@ -781,17 +775,34 @@ class Tag(object):
         return results
 
     #sub-class specific implementations
+    def generate_from_children(self, indent_level=0, encode=None):
+        """
+        Returns code generated from children.
+        """
+
+        text = ''
+        for child in self.children:
+            child_text = child.generate(indent_level=indent_level,
+                                        encode=encode)
+            if child_text and len(child_text):                
+                text += "\r\n"+child_text
+            child_text = ''
+        return text
+
     def generate_for_attrs(self):
         """
         Subclasses must implement this.
         """
         return ''
 
-    def generate(self, indent_level=0):
+    def generate(self, indent_level=0, encode=None):
         """
         Generates code for tree rooted at self.
 
         Inheriting classes need to implement this.
+
+        encode = A callable object that is provided by
+        the parent to perform encoding of the children.
         """
 
         return ''

@@ -4,6 +4,22 @@ from simple_html_element import SimpleHTMLElement as Element
 Class that houses the various HTML Tags/Elements like form, iframe, input, label etc.
 """
 
+class Button(Element):
+    def __init__(self,text='Click Me!', onclick='', attrs=None, parent=None):
+        """
+        text    - text that goes on the button.
+        onlick  - function name to be called
+        """
+        if attrs is None or len(attrs) == 0:
+            if attrs is None:
+                attrs = {}
+
+        if 'onclick' not in attrs:
+            attrs['onclick'] = onclick
+        
+        text_child = Text(text=text)
+        super(Button, self).__init__('button', attrs=attrs, parent=parent, child=text_child)
+
 class Script(Element):
     """
     Creates a <script> element where the default value for the
@@ -41,7 +57,7 @@ class Form(Element):
         if 'action' not in attrs:
             attrs['action'] = action
 
-        super(Form, self).__init__('form', attrs=attrs, parent=parent, child=child)        
+        super(Form, self).__init__('form', attrs=attrs, parent=parent, child=child)
 
 class IFrame(Element):
     def __init__(self, src='', width="500", height="500", attrs=None, parent=None, child=None):

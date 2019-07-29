@@ -204,7 +204,7 @@ class Tag(object):
         """
 
         if new_child is None:
-            raise ValueError("Cannot insert None into a tag.")
+            return
         if new_child is self:
             raise ValueError("Cannot insert a tag into itself.")
         

@@ -44,7 +44,39 @@ class SimpleCSRFDOMBuilderTest(unittest.TestCase):
         csrf_POC_code = csrf_POC_builder.generate()
 
         #print the POC
-        print "Generated POC:\n"+csrf_POC_code
+        print "Generated form POC:\n"+csrf_POC_code
+
+        #close it out so the temp file is deleted
+        multipart_request_stream.close()
+
+    def test_b_multi_part_csrf_xhr(self):
+        """
+        Tests building an HTML with form based CSRF request
+        for a multipart/form-data request.
+        """
+        
+        multipart_request_stream = open(self.put_request_multipart_file, 'r')
+
+        #get a request handle
+        multipart_request = HttpRequest(multipart_request_stream)
+        multipart_request.parse_request_header()
+        multipart_request.parse_request_body()
+        
+        #create a request array
+        requests = [ multipart_request ]
+        
+        #initialize a CSRF POC builder
+        csrf_POC_builder = SimpleCSRFDOMBuilder(requests)
+
+        #request a build of form based CSRF POC with auto-submit script
+        csrf_POC_builder.build_CSRF_POC(type=SimpleCSRFDOMBuilder.Type.xhr_request,
+                                            target_type=SimpleCSRFDOMBuilder.TargetType.iframe,auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_POC_builder.generate()
+
+        #print the POC
+        print "Generated XHR POC:\n"+csrf_POC_code
 
         #close it out so the temp file is deleted
         multipart_request_stream.close()

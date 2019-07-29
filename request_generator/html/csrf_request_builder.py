@@ -3,8 +3,10 @@ from base64 import b64encode
 
 from request_parser.http.request import HttpRequest, QueryDict
 from request_parser.conf.settings import Settings
+from request_parser.http.constants import MetaDict
 
 from js_statements_template import *
+from xhr_js_template import *
 import dom.simple_html_elements as HTMLDocument
 
 class UnsupportedFormMethodException(Exception):
@@ -127,14 +129,194 @@ class SimpleCSRFDOMBuilder():
         
         #set our request object as the one constructed
         return html_dom
-    
-    #TODO: Implement this.
-    def build_XHR_request(self, target_type=TargetType.same_page, auto_submit=False):
+        
+    def build_XHR_request(self, auto_submit=False):
         """
         Builds HTML DOM to make XHR request
         """
-        pass
+        
+        if self.http_requests is None:
+            return None
+
+        #get an HTML DOM
+        html_dom = self._build_CSRF_template_DOM()
+
+        #build an iframe to show the responses onto
+        iframe_attrs = {
+            'id' : 'iframe0'
+        }
+        iframe = HTMLDocument.IFrame(attrs=iframe_attrs)
+        html_dom.body[0].append(iframe)
+        #add a BR element
+        html_dom.body[0].append(HTMLDocument.BR())
+        
+        #create a script element to which a lot of the XHR
+        #related JS code will be added
+        xhr_script = HTMLDocument.Script()
+        html_dom.body[0].append(xhr_script)
+
+        #iframe reference code
+        iframe_reference_snippet = HTMLDocument.Text(text=IFRAME_REF_STMT_TEXT)
+        xhr_script.append(iframe_reference_snippet)
+
+        #createCORSrequest function
+        create_cors_req_function_snippet_1 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_TEXT1)
+        create_cors_req_function_snippet_2 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_TEXT2)
+        onreadystatechangetrigger_function_snippet_1 = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_TEXT1)
+        onreadystatechangetrigger_function_snippet_2 = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_TEXT2)
+        xhr_script.append(create_cors_req_function_snippet_1)
+        xhr_script.append(create_cors_req_function_snippet_2)
+        #add a new line
+        xhr_script.append(HTMLDocument.Text(text=" "))
+        xhr_script.append(onreadystatechangetrigger_function_snippet_1)
+        xhr_script.append(onreadystatechangetrigger_function_snippet_2)
+
+        #create header for sendXHR() function
+        send_XHR_function_header_snippet = HTMLDocument.Text(text=SEND_XHR_FUNCTION_HEADER_TEXT)
+        send_XHR_function_footer_snippet = HTMLDocument.Text(text=SEND_XHR_FUNCTION_FOOTER_TEXT)
+        xhr_script.append(send_XHR_function_footer_snippet)
+
+        #for each request, build XHR for them
+        #and add them to send_XHR_function_header_snippet
+        for index, request in enumerate(self.http_requests):
+            self._build_XHR_snippets(parent_script=xhr_script, send_xhr=send_XHR_function_header_snippet,
+                                    index=index, request=request)
+        
+        #add the header and footer of sendXHR()
+        xhr_script.append(send_XHR_function_header_snippet)
+        xhr_script.append(send_XHR_function_footer_snippet)
+
+        #add a click Button
+        send_xhr_function_name = SEND_XHR_FUNCTION_NAME+"();"
+        click_me_button = HTMLDocument.Button(text="Submit XHR CSRF", onclick=send_xhr_function_name)
+        html_dom.body[0].append(click_me_button)
+
+        return html_dom
     
+    def _build_XHR_snippets(self, parent_script=None, send_xhr=None, index=0, request=None):
+        """
+        Builds XHR JS statements that get added onto sendXHR function.
+
+        Returns a set of Text elements containing JS statements required
+        to make that XHR request.
+        """        
+
+        if parent_script is None or send_xhr is None or request is None:
+            return None
+
+        #get info about the request
+        method = request.method
+        get_parameters = request.GET
+        post_parameters = request.POST
+        files = request.FILES
+        req_content_type = request.content_type
+
+        #get the safe URI with get_parameters
+        action_url = request.get_uri() + self._build_query_string(get_parameters)
+
+        post_data = None
+        # if the content-type is multipart/form-data
+        if req_content_type == "multipart/form-data":
+            form_data_obj_text = FORM_DATA_API_TEXT.format(index)
+            form_data_obj = HTMLDocument.Text(text=form_data_obj_text)
+            send_xhr.append(form_data_obj)
+
+            #build JS statements for files
+            for file_index, param_name in enumerate(files):
+                #add the getFile function during the first iteration
+                if index == 0:
+                    get_file_js = self._build_get_file_JS_function()
+                    parent_script.append(get_file_js)
+                    get_file_js.unwrap()
+                    #add a line break
+                    parent_script.append(HTMLDocument.Text(text=' '))
+
+                #get a script elemetn that contains the JS statements
+                file_JS_element = self._build_multipart_file_js_snippet(file_index=file_index,
+                                        multipart_file=files[param_name],xhr=True)
+                #add the received element
+                send_xhr.append(file_JS_element)
+                #and unwrap it
+                if file_JS_element is not None:
+                    file_JS_element.unwrap()
+
+                #build the statement to add file{} object to the
+                #formData object
+                form_data_file_append_text = FORM_DATA_FILE_APPEND_TEXT.format(index, param_name, file_index)
+                form_data_file_append = HTMLDocument.Text(text=form_data_file_append_text)
+                send_xhr.append(form_data_file_append)               
+            
+            #build JS statements to add POST params to
+            #the formdata object
+            for param_name, value in post_parameters.items():
+                if req_content_type == "multipart/form-data":
+                    value = value['data']
+                form_data_param_append_text = FORM_DATA_PARAM_APPEND_TEXT.format(index,
+                                                    Encoder.encode_for_JS_data_values(param_name),
+                                                    Encoder.encode_for_JS_data_values(value))
+                form_data_param_append = HTMLDocument.Text(text=form_data_param_append_text)
+                send_xhr.append(form_data_param_append)
+            
+            #add an empty line
+            send_xhr.append(HTMLDocument.Text(text=' '))
+        # if the content-type is something else
+        else:
+            post_data = self._build_XHR_post_data(xhr_index=index, params=post_parameters)
+        
+        #complete the rest of the statements
+        create_xhr_text_1 = CREATE_XHR_STMT_TEXT_1.format(index, method, action_url)
+        create_xhr_text_2 = CREATE_XHR_STMT_TEXT_2.format(index)
+        create_xhr_text_3 = CREATE_XHR_STMT_TEXT_3
+        create_xhr_text_4 = CREATE_XHR_STMT_TEXT_4.format(index, index)
+        
+        #create text elements out of it
+        create_xhr_1 = HTMLDocument.Text(text=create_xhr_text_1)
+        create_xhr_2 = HTMLDocument.Text(text=create_xhr_text_2)
+        create_xhr_3 = HTMLDocument.Text(text=create_xhr_text_3)
+        create_xhr_4 = HTMLDocument.Text(text=create_xhr_text_4)
+        create_xhr_2.append(create_xhr_3)
+        
+        #build the xhr.send() statement
+        xhr_send_text = ''
+        if req_content_type == 'multipart/form-data':
+            xhr_send_text = XHR_SEND.format(index, "formData{}".format(index))
+        else:
+            if post_data is not None:
+                xhr_send_text = XHR_SEND.format(index,
+                                "'"+Encoder.encode_for_JS_data_values(post_data)+"'")
+            else:
+                xhr_send_text = XHR_SEND.format(index, '')
+        timeout_function_text = XHR_SEND_TIMEOUT.format(xhr_send_text, XHR_TIMEOUT * (index+1))
+        timeout_function = HTMLDocument.Text(text=timeout_function_text)
+
+        #append to send_xhr
+        send_xhr.append(create_xhr_1)
+        send_xhr.append(create_xhr_2)
+        send_xhr.append(create_xhr_4)
+
+        #set credentials required to true
+        xhr_creds_text = XHR_WITH_CREDS_TEXT.format(index)
+        xhr_creds = HTMLDocument.Text(text=xhr_creds_text)
+        send_xhr.append(xhr_creds)
+
+        #if content-type is not multipart/form-data, or text/plain
+        #then set the content-type header and other
+        #custom headers
+        if req_content_type != "multipart/form-data" or\
+            req_content_type != "text/plain":
+            xhr_content_type_hdr_text = XHR_HDR_STMT_TEXT.format(index,
+                                        'content-type',
+                                        Encoder.encode_for_JS_data_values(req_content_type))
+            xhr_content_type_hdr = HTMLDocument.Text(text=xhr_content_type_hdr_text)
+            send_xhr.append(xhr_content_type_hdr)
+        
+        for header_statements in self._build_XHR_header_JS_snippets(xhr_index=index,
+                                                                request=request):
+            send_xhr.append(header_statements)
+        
+        #append to send_xhr        
+        send_xhr.append(timeout_function)
+
     def _build_form(self, id=1, request=None):
         """
         Builds and returns an HTML form for the provided
@@ -145,21 +327,17 @@ class SimpleCSRFDOMBuilder():
         if request is None:
             return None
         
-        method = request.method
-        #extract the info needed to construct a form
-        req_content_type = request.content_type
-        if  req_content_type != "application/x-www-form-urlencoded" and\
-            req_content_type != "multipart/form-data" and\
-            req_content_type != "text/plain":
-            raise UnsupportedContentTypeException()
-        
         #build a generic form
         #extract the info needed to construct a form
         method = request.method
         get_parameters = request.GET
         post_parameters = request.POST
         req_content_type = request.content_type
-
+        if  req_content_type != "application/x-www-form-urlencoded" and\
+            req_content_type != "multipart/form-data" and\
+            req_content_type != "text/plain":
+            raise UnsupportedContentTypeException()
+                
         #get the safe URI with get_parameters
         action_url = request.get_uri() + self._build_query_string(get_parameters)
 
@@ -232,7 +410,7 @@ class SimpleCSRFDOMBuilder():
             index +=1
         return query_string
 
-    def _build_multipart_file_js_snippet(self, file_index = 1, multipart_file=None):
+    def _build_multipart_file_js_snippet(self, file_index = 0, multipart_file=None, xhr=False):
         """
         Builds multipart JS snippet statements.
         """
@@ -254,11 +432,21 @@ class SimpleCSRFDOMBuilder():
         decoded_assignment_text = MULTI_PART_FILE_JS_DECODED_STMT.format(decoded_file_name, encoded_file_name)
         file_input_assignment_text = ''
         if content_type is not None and len(content_type) > 0:
-            file_input_assignment_text = MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_1.format(file_index,
-                                        decoded_file_name, Encoder.encode_for_JS_data_values(file_name),
-                                        Encoder.encode_for_JS_data_values(content_type))
+            template_ = ''
+            if not xhr:
+                template_ = MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_1                
+            elif xhr:
+                template_ = XHR_FILE_ASSIGNMENT_STMT_1
+            file_input_assignment_text = template_.format(file_index,
+                                            decoded_file_name, Encoder.encode_for_JS_data_values(file_name),
+                                            Encoder.encode_for_JS_data_values(content_type))
         else:
-            file_input_assignment_text = MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_2.format(file_index,
+            template_ = ''
+            if not xhr:
+                template_ = MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_2                
+            elif xhr:
+                template_ = XHR_FILE_ASSIGNMENT_STMT_2
+            file_input_assignment_text = template_.format(file_index,
                                         decoded_file_name, Encoder.encode_for_JS_data_values(file_name))
         
         #create text elements
@@ -280,7 +468,7 @@ class SimpleCSRFDOMBuilder():
         """
         get_file_script_element = HTMLDocument.Script()
         #create text elements for the JS statements
-        func_hdr = HTMLDocument.Text(text=GET_FILE_FUNCTION_HEADER)
+        func_hdr = HTMLDocument.Text(text=GET_FILES_FUNCTION_HEADER)
         func_stmt1 = HTMLDocument.Text(text=JS_COMMENT)
         func_stmt2 = HTMLDocument.Text(text=DATA_TRANSFER_JS_CLIPBOARD_STMT)
         func_stmt3 = HTMLDocument.Text(text=DATA_TRANSFER_JS_STMT)
@@ -291,7 +479,7 @@ class SimpleCSRFDOMBuilder():
         func_if_false = HTMLDocument.Text(text=IF_FALSE)
         func_if_false.setup(parent=func_else)
         func_return = HTMLDocument.Text(text=RETURN_STMT)
-        func_footer = HTMLDocument.Text(text=GET_FILE_FUNCTION_FOOTER)
+        func_footer = HTMLDocument.Text(text=GET_FILES_FUNCTION_FOOTER)
 
         #add them to the script element
         get_file_script_element.append(func_hdr)
@@ -330,12 +518,53 @@ class SimpleCSRFDOMBuilder():
         """
         Builds a simple HTML DOM to be used in CSRF.
         """
-
+        csrf_title_text = "Enhanced CSRF POC."
         html_dom    = HTMLDocument.HTML()
         html_head   = HTMLDocument.Head(parent=html_dom)
-        html_title  = HTMLDocument.Title(title="Advanced CSRF POC!", parent=html_head)
+        html_title  = HTMLDocument.Title(title=csrf_title_text, parent=html_head)
         html_body   = HTMLDocument.Body(parent=html_dom)
-        html_body_title = HTMLDocument.Heading(text='Advanced CSRF POC!')
+        html_body_title = HTMLDocument.Heading(text=csrf_title_text)
         html_body.append(html_body_title)
 
         return html_dom
+
+    #TODO: Add only custom headers and not standard headers.
+    def _build_XHR_header_JS_snippets(self, xhr_index=0, request=None):
+        """
+        Builds JS statements for custom headers in request.
+        """
+        xhr_header_statements = []
+        if request is None:
+            return xhr_header_statements            
+
+        request_headers = request.META[MetaDict.Info.REQ_HEADERS]
+        #add all the headers
+        #CAUTION: request_headers is a MultivalueDict and calling
+        #.items() returns (key, value) pairs where value is the 
+        #last item in the list!
+        for header, value in request_headers.items():
+            xhr_header_text = XHR_HDR_STMT_TEXT.format(xhr_index,
+                                        Encoder.encode_for_JS_data_values(header),
+                                        Encoder.encode_for_JS_data_values(value))
+            xhr_header = HTMLDocument.Text(text=xhr_header_text)
+            xhr_header_statements.append(xhr_header)
+
+        return xhr_header_statements
+
+    def _build_XHR_post_data(self, xhr_index=0, params=None):
+        """
+        Builds the POST body for an XHR request.
+        """
+        post_data = None
+        if params is None or len(params) == 0:
+            return post_data
+
+        for index, param_name, value in enumerate(params.getitems()):
+            if index == 0:
+                post_data += '?'
+            
+            if index != 0:
+                    post_data += '&'    
+            post_data += param_name+'='+value
+        
+        return post_data

@@ -15,8 +15,8 @@ MULTI_PART_FILE_JS_DECODED_STMT         = """var {} = window.atob({});"""
 
 # arg 1 - input element id, arg 2 - decoded file variable name, arg 3 - file name
 # arg 4 - content-type
-MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_1 = """fileToUpload{}.files = getFile({}, '{}', '{}');"""
-MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_2 = """fileToUpload{}.files = getFile({}, {});"""
+MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_1 = """fileToUpload{}.files = getFiles({}, '{}', '{}');"""
+MULTI_PART_FILE_INPUT_ASSIGNMENT_STMT_2 = """fileToUpload{}.files = getFiles({}, {});"""
 
 #used to generate getFile JS function
 GET_FILES_FUNCTION_HEADER       = 'function getFiles(file_content, file_name, content_type) {'

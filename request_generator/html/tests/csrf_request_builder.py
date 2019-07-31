@@ -9,21 +9,74 @@ from request_parser.conf.settings import Settings
 from ..csrf_request_builder import SimpleCSRFDOMBuilder
 from request_generator.utils.utils import get_abs_path
 
-TEST_FILES_DIR = "html/tests"
-GEN_OUTPUT_DIR = "gen_test_csrf_poc"
+TEST_REQUESTS_FILES_DIR = "html/tests/raw_http_requests"
+GEN_OUTPUT_DIR = "html/tests/gen_test_csrf_poc"
 
 class SimpleCSRFDOMBuilderTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.test_files_dir = get_abs_path(TEST_FILES_DIR)
-
-        put_request_multipart_file = "complex-request1.txt"
-        cls.put_request_multipart_file = path.join(cls.test_files_dir, put_request_multipart_file)
+        cls.get_request_1                   = "get-request1.txt"
+        cls.post_request_2_plain_text       = "post-request2-plain-text.txt"
+        cls.get_request_3_with_query_string = "get-request3-with-query-string.txt"
+        cls.post_request_with_query         = "post-request-with-query.txt"
+        cls.put_request_multipart_file      = "complex-request1.txt"
 
         print "Generated CSRF POCs are written inside the '"+GEN_OUTPUT_DIR+\
                 "' directory inside the tests package."
     
+    def get_abs_path_file(self, file_name=None):
+        if file_name is None or len(file_name) == 0:
+            return None
+        
+        self.test_files_dir = get_abs_path(TEST_REQUESTS_FILES_DIR)
+        
+        return path.join(self.test_files_dir, file_name)
+
+    def parse_and_build_dom(self, request_file_names=[], type=SimpleCSRFDOMBuilder.Type.form_request,
+                                    target_type=SimpleCSRFDOMBuilder.TargetType.iframe, auto_submit=True):
+        """
+        Method that takes care of the most repeated part - parse requests and generate the request DOM.
+        """
+
+        request_dom = None
+        if request_file_names is None or len(request_file_names) == 0:
+            return request_dom
+
+        request_streams = []
+        requests_raw = []
+
+        #create streams out of file_names
+        for index, request_file_name in enumerate(request_file_names):
+            request_file_name = self.get_abs_path_file(request_file_name)
+            request_file_names[index] = request_file_name
+            request_stream = open(request_file_name, 'r')
+            request_streams.append(request_stream)
+        
+        #create requests handle for each of the stream
+        for request_stream in request_streams:
+            request = HttpRequest(request_stream=request_stream)
+            requests_raw.append(request)
+
+        #start parsing each of the request
+        for request in requests_raw:
+            request.parse_request_header()
+            request.parse_request_body()
+        
+        #generate request DOM for the combined requests
+        request_dom = SimpleCSRFDOMBuilder(http_requests=requests_raw)
+        
+        #trigger build
+        request_dom.build_CSRF_POC(type=type, target_type=target_type, auto_submit=auto_submit)
+
+        #for each of the stream close them
+        for request_stream in request_streams:
+            request_stream.close()
+
+        #return the built DOM ready
+        #for generation
+        return request_dom
+
     def write_to_test_output_dir(self, file_name=None, data=None):
         """
         Writes the file with file_name to the test output directory inside the tests package.
@@ -35,9 +88,8 @@ class SimpleCSRFDOMBuilderTest(unittest.TestCase):
         if data is None:
             return
         
-        #construct the absolute output dir for test CSRF POCs
-        output_dir_name = path.join(TEST_FILES_DIR, GEN_OUTPUT_DIR)
-        dir_path = get_abs_path(output_dir_name)
+        #construct the absolute output dir for test CSRF POCs        
+        dir_path = get_abs_path(GEN_OUTPUT_DIR)
 
         #make the temp directory if it doesn't exist
         if not path.exists(dir_path):
@@ -54,76 +106,216 @@ class SimpleCSRFDOMBuilderTest(unittest.TestCase):
         for a multipart/form-data request.
         """
         
-        request_stream1 = open(self.put_request_multipart_file, 'r')
+        request_file_names = [self.put_request_multipart_file]
 
-        #get a request handle
-        request1 = HttpRequest(request_stream1)
-        request1.parse_request_header()
-        request1.parse_request_body()
-        
-        #create a request array
-        requests = [ request1 ]
-        
-        #initialize a CSRF POC builder
-        csrf_POC_builder = SimpleCSRFDOMBuilder(requests)
-
-        #request a build of form based CSRF POC with auto-submit script
-        csrf_POC_builder.build_CSRF_POC(type=SimpleCSRFDOMBuilder.Type.form_request,
-                                            target_type=SimpleCSRFDOMBuilder.TargetType.iframe,auto_submit=True)
-        
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.form_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+    
         #generate DOM code
-        csrf_POC_code = csrf_POC_builder.generate()
+        csrf_POC_code = csrf_poc_dom_builder.generate()        
 
         #generate file name
-        csrf_POC_file_name = "single_request_multi_part_csrf_form"
-        csrf_POC_file_name += ".html"
+        csrf_POC_file_name = "a_single_request_multi_part_csrf_form.html"
 
         #write the file
         self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
-
-        #close it out so the temp file is deleted
-        request_stream1.close()
-
-        #print that file generated
-        print "Generated POC file: "+csrf_POC_file_name
 
     def test_b_single_request_multi_part_csrf_xhr(self):
         """
         Tests building an HTML with form based CSRF request
         for a multipart/form-data request.
         """
-        
-        request_stream1 = open(self.put_request_multipart_file, 'r')
 
-        #get a request handle
-        request1 = HttpRequest(request_stream1)
-        request1.parse_request_header()
-        request1.parse_request_body()
-        
-        #create a request array
-        requests = [ request1 ]
-        
-        #initialize a CSRF POC builder
-        csrf_POC_builder = SimpleCSRFDOMBuilder(requests)
+        request_file_names = [self.put_request_multipart_file]
 
-        #request a build of form based CSRF POC with auto-submit script
-        csrf_POC_builder.build_CSRF_POC(type=SimpleCSRFDOMBuilder.Type.xhr_request,
-                                            target_type=SimpleCSRFDOMBuilder.TargetType.iframe,auto_submit=True)
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.xhr_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
         
         #generate DOM code
-        csrf_POC_code = csrf_POC_builder.generate()
+        csrf_POC_code = csrf_poc_dom_builder.generate()
 
         #generate file name
-        csrf_POC_file_name = "single_request_multi_part_csrf_xhr"
-        csrf_POC_file_name += ".html"
+        csrf_POC_file_name = "b_single_request_multi_part_csrf_xhr.html"
 
         #write the file
         self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
 
-        #close it out so the temp file is deleted
-        request_stream1.close()
+    def test_c_single_request_get_csrf_form_1(self):
+        request_file_names = [self.get_request_1]
 
-        #print that file generated
-        print "Generated POC file: "+csrf_POC_file_name
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.form_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
 
+        #generate file name
+        csrf_POC_file_name = "c_single_request_get_csrf_form_1.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_d_single_request_get_csrf_xhr_1(self):
+        request_file_names = [self.get_request_1]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.xhr_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "d_single_request_get_csrf_xhr_1.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_e_single_request_get_csrf_form_2(self):
+        request_file_names = [self.post_request_2_plain_text]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.form_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "e_single_request_post_csrf_form_2.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_f_single_request_get_csrf_xhr_2(self):
+        request_file_names = [self.post_request_2_plain_text]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.xhr_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "f_single_request_post_csrf_xhr_2.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_g_single_request_get_csrf_form_3(self):
+        request_file_names = [self.get_request_3_with_query_string]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.form_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "g_single_request_get_csrf_form_3.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_h_single_request_get_csrf_xhr_3(self):
+        request_file_names = [self.get_request_3_with_query_string]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.xhr_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "h_single_request_get_csrf_xhr_3.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_i_single_request_post_csrf_form(self):
+        request_file_names = [self.post_request_with_query]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.form_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "i_single_request_post_csrf_form.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_j_single_request_post_csrf_xhr(self):
+        request_file_names = [self.post_request_with_query]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.xhr_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "j_single_request_post_csrf_xhr.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_k_multi_request_csrf_form(self):
+        request_file_names = [self.get_request_1, self.post_request_2_plain_text, self.get_request_3_with_query_string, self.post_request_with_query,
+                             self.put_request_multipart_file
+                            ]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.form_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "k_multi_request_csrf_form.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
+    def test_l_multi_request_csrf_xhr(self):
+        request_file_names = [self.get_request_1, self.post_request_2_plain_text, self.get_request_3_with_query_string, self.post_request_with_query,
+                             self.put_request_multipart_file
+                            ]
+
+        csrf_poc_dom_builder = self.parse_and_build_dom(request_file_names=request_file_names,
+                                type=SimpleCSRFDOMBuilder.Type.xhr_request,
+                                target_type=SimpleCSRFDOMBuilder.TargetType.iframe,
+                                auto_submit=True)
+        
+        #generate DOM code
+        csrf_POC_code = csrf_poc_dom_builder.generate()
+
+        #generate file name
+        csrf_POC_file_name = "l_multi_request_csrf_xhr.html"
+
+        #write the file
+        self.write_to_test_output_dir(file_name=csrf_POC_file_name, data=csrf_POC_code)
+    
 unittest.main()

@@ -224,7 +224,7 @@ class SimpleCSRFDOMBuilder():
             #build JS statements for files
             for file_index, param_name in enumerate(files):
                 #add the getFile function during the first iteration
-                if index == 0:
+                if file_index == 0:
                     get_file_js = self._build_get_file_JS_function()
                     parent_script.append(get_file_js)
                     get_file_js.unwrap()
@@ -259,9 +259,13 @@ class SimpleCSRFDOMBuilder():
             
             #add an empty line
             send_xhr.append(HTMLDocument.Text(text=' '))
+        elif req_content_type == "text/plain":
+            post_data = request.body()
         # if the content-type is something else
-        else:
+        elif req_content_type == "application/x-www-form-urlencoded":
             post_data = self._build_XHR_post_data(xhr_index=index, params=post_parameters)
+        else:
+            post_data = request.body()
         
         #complete the rest of the statements
         create_xhr_text_1 = CREATE_XHR_STMT_TEXT_1.format(index, method, action_url)
@@ -298,17 +302,14 @@ class SimpleCSRFDOMBuilder():
         xhr_creds_text = XHR_WITH_CREDS_TEXT.format(index)
         xhr_creds = HTMLDocument.Text(text=xhr_creds_text)
         send_xhr.append(xhr_creds)
-
-        #if content-type is not multipart/form-data, or text/plain
+    
         #then set the content-type header and other
         #custom headers
-        if req_content_type != "multipart/form-data" or\
-            req_content_type != "text/plain":
-            xhr_content_type_hdr_text = XHR_HDR_STMT_TEXT.format(index,
-                                        'content-type',
+        xhr_content_type_hdr_text = XHR_HDR_STMT_TEXT.format(index,
+                                        'Content-Type',
                                         Encoder.encode_for_JS_data_values(req_content_type))
-            xhr_content_type_hdr = HTMLDocument.Text(text=xhr_content_type_hdr_text)
-            send_xhr.append(xhr_content_type_hdr)
+        xhr_content_type_hdr = HTMLDocument.Text(text=xhr_content_type_hdr_text)
+        send_xhr.append(xhr_content_type_hdr)
         
         for header_statements in self._build_XHR_header_JS_snippets(xhr_index=index,
                                                                 request=request):
@@ -316,6 +317,8 @@ class SimpleCSRFDOMBuilder():
         
         #append to send_xhr        
         send_xhr.append(timeout_function)
+        #add an empty line
+        send_xhr.append(HTMLDocument.Text(text=' '))
 
     def _build_form(self, id=1, request=None):
         """
@@ -336,7 +339,7 @@ class SimpleCSRFDOMBuilder():
         if  req_content_type != "application/x-www-form-urlencoded" and\
             req_content_type != "multipart/form-data" and\
             req_content_type != "text/plain":
-            raise UnsupportedContentTypeException()
+            raise UnsupportedContentTypeException("{}".format(req_content_type))
                 
         #get the safe URI with get_parameters
         action_url = request.get_uri() + self._build_query_string(get_parameters)
@@ -376,6 +379,18 @@ class SimpleCSRFDOMBuilder():
             form.append(file_input_element)
             form.append(HTMLDocument.BR())
         
+        #handle text/plain content
+        if req_content_type == 'text/plain':
+            #add a warning as we're creating a form for text/plain
+            warning_text = HTMLDocument.Font(text='Warning: text/plain type form might not work as expected.')
+            text_plain_content = request.body()
+            text_plain_content = Encoder.encode_for_HTML_attrib(text_plain_content)
+            text_plain_input_element = HTMLDocument.Input(name=text_plain_content,
+                                                          _type=HTMLDocument.Input.Type.hidden)
+            form.append(HTMLDocument.BR())
+            form.append(warning_text)
+            form.append(text_plain_input_element)
+
         #construct JS statements to assign files to their input elements
         for index, param_name in enumerate(files):
             file_object = files[param_name]
@@ -385,7 +400,7 @@ class SimpleCSRFDOMBuilder():
 
         #add the submit button
         form.append(HTMLDocument.BR())
-        form.append(HTMLDocument.Input(name='Submit', _type=HTMLDocument.Input.Type.submit, value="Submit"))
+        form.append(HTMLDocument.Input(_type=HTMLDocument.Input.Type.submit, value="Submit CSRF POC"))
 
         return form
     
@@ -397,14 +412,15 @@ class SimpleCSRFDOMBuilder():
         if len(query_dict) == 0:
             return ''
         
-        query_string = '?'
+        query_string = ''
         index = 0
-        for key, value in query_dict:
+        
+        for key, value in query_dict.items():
             q_string = '{}={}'
             q_string = q_string.format(Encoder.escape_for_url_parameter_value(key), 
                                        Encoder.escape_for_url_parameter_value(value))
             if index == 0:
-                query_string += q_string
+                query_string += '?'+q_string
             else:
                 query_string += '&'+q_string
             index +=1
@@ -543,6 +559,22 @@ class SimpleCSRFDOMBuilder():
         #.items() returns (key, value) pairs where value is the 
         #last item in the list!
         for header, value in request_headers.items():
+            header_lower = header.lower()
+            if header_lower == 'content-type':
+                continue                
+            elif header_lower == 'user-agent':
+                continue
+            elif header_lower == 'host':
+                continue
+            elif header_lower == 'content-length':
+                continue
+            elif header_lower == 'connection':
+                continue
+            elif header_lower == 'accept-encoding':
+                continue
+            elif header_lower == 'accept-charset':
+                continue
+            
             xhr_header_text = XHR_HDR_STMT_TEXT.format(xhr_index,
                                         Encoder.encode_for_JS_data_values(header),
                                         Encoder.encode_for_JS_data_values(value))
@@ -555,16 +587,18 @@ class SimpleCSRFDOMBuilder():
         """
         Builds the POST body for an XHR request.
         """
-        post_data = None
+        post_data = ''
         if params is None or len(params) == 0:
             return post_data
 
-        for index, param_name, value in enumerate(params.getitems()):
+        index = 0
+        for param_name, value in params.items():
             if index == 0:
                 post_data += '?'
             
             if index != 0:
                     post_data += '&'    
             post_data += param_name+'='+value
+            index += 1
         
         return post_data

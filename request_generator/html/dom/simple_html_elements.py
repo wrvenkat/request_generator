@@ -4,6 +4,28 @@ from simple_html_element import SimpleHTMLElement as Element
 Class that houses the various HTML Tags/Elements like form, iframe, input, label etc.
 """
 
+class Font(Element):
+    class Color:
+        red     = 'red'
+        blue    = 'blue'
+        green   = 'yellow'
+        #etc
+
+    def __init__(self,text='', color=Color.red, attrs=None, parent=None):
+        """
+        text    - text to which the font applies to.
+        color   - color property of the style attribute. Default is red.
+        """
+        if attrs is None or len(attrs) == 0:
+            if attrs is None:
+                attrs = {}
+
+        if 'color' not in attrs:
+            attrs['style'] = 'color:'+color
+        
+        text_child = Text(text=text)
+        super(Font, self).__init__('font', attrs=attrs, parent=parent, child=text_child)
+
 class Button(Element):
     def __init__(self,text='Click Me!', onclick='', attrs=None, parent=None):
         """

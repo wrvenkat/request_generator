@@ -1,4 +1,4 @@
-POST http://www.knowhere484.com/caf%C3%A9/upload HTTP/1.1
+POST https://jsonplaceholder.typicode.com/posts HTTP/1.1
 Host: www.knowhere123.com
 Accept: image/gif, image/jpeg, */*
 Accept-Language: en-us

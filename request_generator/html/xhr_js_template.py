@@ -5,33 +5,33 @@ IFRAME_REF_STMT_TEXT    = """var iframe0 = document.getElementById('iframe0');""
 # Creates a compatible XHR request object
 # See https://www.html5rocks.com/en/tutorials/cors/#toc-cross-domain-from-chrome-extensions
 # for more information on the functions/statements below
-CREATE_XHR_FUNCTION_TEXT1 =  """function createCORSRequest(method, url) {\r\n"""+\
-                            """\tvar xhr = new XMLHttpRequest();\r\n"""+\
-                            """\tif ("withCredentials" in xhr) {\r\n"""+\
-                            """\t\t// Check if the XMLHttpRequest object has a "withCredentials" property.\r\n"""+\
-                            """\t\t// "withCredentials" only exists on XMLHTTPRequest2 objects.\r\n"""+\
-                            """\t\txhr.open(method, url, true);\r\n"""+\
-                            """\t} else if (typeof XDomainRequest != "undefined") {\r\n"""+\
-                            """\t\t// Otherwise, check if XDomainRequest.\r\n"""+\
-                            """\t\t// XDomainRequest only exists in IE, and is IE's way of making CORS requests.\r\n"""+\
-                            """\t\txhr = new XDomainRequest();\r\n"""+\
-                            """\t\txhr.open(method, url);\r\n"""+\
-                            """\t} else {\r\n"""+\
-                            """\t\t// Otherwise, CORS is not supported by the browser.\r\n"""+\
-                            """\t\txhr = null;\r\n"""+\
-                            """\t}\r\n"""+\
-                            """\treturn xhr;"""
-CREATE_XHR_FUNCTION_TEXT2 = """}"""
+CREATE_XHR_FUNCTION_HDR         =   """function createCORSRequest(method, url) {"""
+CREATE_XHR_FUNCTION_STMT_1      =   """var xhr = new XMLHttpRequest();"""
+CREATE_XHR_FUNCTION_IF_1        =   """if ("withCredentials" in xhr) {"""
+CREATE_XHR_FUNCTION_IF_1_STMT_1 =   """// Check if the XMLHttpRequest object has a "withCredentials" property."""
+CREATE_XHR_FUNCTION_IF_1_STMT_2 =   """// "withCredentials" only exists on XMLHTTPRequest2 objects."""
+CREATE_XHR_FUNCTION_IF_1_STMT_3 =   """xhr.open(method, url, true);"""
+CREATE_XHR_FUNCTION_IF_2        =   """else if (typeof XDomainRequest != "undefined") {"""
+CREATE_XHR_FUNCTION_IF_2_STMT_1 =   """// Otherwise, check if XDomainRequest."""
+CREATE_XHR_FUNCTION_IF_2_STMT_2 =   """// XDomainRequest only exists in IE, and is IE's way of making CORS requests."""
+CREATE_XHR_FUNCTION_IF_2_STMT_3 =   """xhr = new XDomainRequest();"""
+CREATE_XHR_FUNCTION_IF_2_STMT_4 =   """xhr.open(method, url);"""
+CREATE_XHR_FUNCTION_IF_2_STMT_5 =   """}"""
+CREATE_XHR_FUNCTION_IF_3        =   """else"""
+CREATE_XHR_FUNCTION_IF_3_STMT_1 =   """// Otherwise, CORS is not supported by the browser."""
+CREATE_XHR_FUNCTION_IF_3_STMT_2 =   """xhr = null;"""
+CREATE_XHR_FUNCTION_RETURN_STMT =   """return xhr;"""
+CREATE_XHR_FUNCTION_FOOTER      =   """}"""
 
 #xhr onreadystatechange with write to iframe
-XHR_ONREADYSTATECHANGE_FUNCTION_TEXT1 =  """function onreadystatechangeTrigger(xhr) {\r\n"""+\
-                                        """\tif (xhr.readyState === xhr.DONE) {\r\n"""+\
-                                        """\t\tif (xhr.status === 0)\r\n"""+\
-                                        """\t\t\tiframe0.src = \"data:text/html;charset=utf-8,\"+'ERROR: Unable to read response status.';\r\n"""+\
-                                        """\t\telse\r\n"""+\
-                                        """\t\t\tiframe0.src = \"data:text/html;charset=utf-8,\"+xhr.responseText;\r\n"""+\
-                                        """\t}"""
-XHR_ONREADYSTATECHANGE_FUNCTION_TEXT2 = """}"""
+XHR_ONREADYSTATECHANGE_FUNCTION_HDR             = """function onreadystatechangeTrigger(xhr) {"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_START      = """if (xhr.readyState === xhr.DONE) {"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_1       = """if (xhr.status === 0)"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_1_STMT  = """iframe0.src = \"data:text/html;charset=utf-8,\"+'ERROR: Unable to read response status.';"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_2       = """else"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_2_STMT  = """iframe0.src = \"data:text/html;charset=utf-8,\"+xhr.responseText;"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_END        = """}"""
+XHR_ONREADYSTATECHANGE_FUNCTION_FOOTER          = """}"""
 
 # arg 1, arg 4, arg 5 - xhr object name index, arg 2 - method, arg 3 - URL
 CREATE_XHR_STMT_TEXT_1  =   """var xhr{} = createCORSRequest('{}', '{}');"""

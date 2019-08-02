@@ -160,16 +160,19 @@ class SimpleCSRFDOMBuilder():
         xhr_script.append(iframe_reference_snippet)
 
         #createCORSrequest function
-        create_cors_req_function_snippet_1 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_TEXT1)
-        create_cors_req_function_snippet_2 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_TEXT2)
-        onreadystatechangetrigger_function_snippet_1 = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_TEXT1)
-        onreadystatechangetrigger_function_snippet_2 = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_TEXT2)
-        xhr_script.append(create_cors_req_function_snippet_1)
-        xhr_script.append(create_cors_req_function_snippet_2)
+        create_xhr_function_script = self._build_create_XHR_function()
+
+        #createOnReadyStateChange function
+        create_onreadystatechange_script = self._build_create_onreadystatechange_function()        
+
+        #add the crateCORrequest function
+        xhr_script.append(create_xhr_function_script)
+        create_xhr_function_script.unwrap()
+
         #add a new line
         xhr_script.append(HTMLDocument.Text(text=" "))
-        xhr_script.append(onreadystatechangetrigger_function_snippet_1)
-        xhr_script.append(onreadystatechangetrigger_function_snippet_2)
+        xhr_script.append(create_onreadystatechange_script)
+        create_onreadystatechange_script.unwrap()
 
         #create header for sendXHR() function
         send_XHR_function_header_snippet = HTMLDocument.Text(text=SEND_XHR_FUNCTION_HEADER_TEXT)
@@ -574,6 +577,8 @@ class SimpleCSRFDOMBuilder():
                 continue
             elif header_lower == 'accept-charset':
                 continue
+            elif header_lower == 'cookies':
+                continue
             
             xhr_header_text = XHR_HDR_STMT_TEXT.format(xhr_index,
                                         Encoder.encode_for_JS_data_values(header),
@@ -602,3 +607,92 @@ class SimpleCSRFDOMBuilder():
             index += 1
         
         return post_data
+
+    def _build_create_XHR_function(self):
+        """
+        Create XHR function, createCORSRequest().
+        """
+        script_holder_element = HTMLDocument.Script()
+
+        create_cors_req = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_HDR)
+
+        #statemt 1
+        create_cors_req_stmt_1 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_STMT_1)
+
+        #if stmt 1
+        create_cors_req_if_1 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_1)
+        create_cors_req_if_1.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_1_STMT_1))
+        create_cors_req_if_1.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_1_STMT_2))
+        create_cors_req_if_1.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_1_STMT_3))
+
+        #if stmt 2
+        script_holder_element_temp = HTMLDocument.Script()
+        create_cors_req_if_2 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_2)
+        create_cors_req_if_2.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_2_STMT_1))
+        create_cors_req_if_2.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_2_STMT_2))
+        create_cors_req_if_2.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_2_STMT_3))
+        create_cors_req_if_2.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_2_STMT_4))
+        script_holder_element_temp.append(create_cors_req_if_2)
+        script_holder_element_temp.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_2_STMT_5))
+
+        #if stmt 3
+        create_cors_req_if_3 = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_3)
+        create_cors_req_if_3.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_3_STMT_1))
+        create_cors_req_if_3.append(HTMLDocument.Text(text=CREATE_XHR_FUNCTION_IF_3_STMT_2))
+
+        #return stmt
+        create_cors_req_return_stmt = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_RETURN_STMT)
+
+        #footer
+        create_cors_req_footer = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_FOOTER)
+
+        #add the statements to create_cors_req
+        create_cors_req.append(create_cors_req_stmt_1)
+        create_cors_req.append(create_cors_req_if_1)
+        create_cors_req.append(script_holder_element_temp)
+        script_holder_element_temp.unwrap()
+        create_cors_req.append(create_cors_req_if_3)
+        create_cors_req.append(create_cors_req_return_stmt)
+
+        #add it to script element
+        script_holder_element.append(create_cors_req)
+        script_holder_element.append(create_cors_req_footer)
+
+        return script_holder_element
+
+    def _build_create_onreadystatechange_function(self):
+        """
+        Create the onreadystatechangeTrigger() function.
+        """
+
+        script_holder_element = HTMLDocument.Script()
+
+        #onreadystatechange trigger
+        onreadystatechangetrigger_function = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_HDR)
+
+        #if_1
+        onreadystatechangetrigger_if_start = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_START)
+        onreadystatechangetrigger_if_end = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_END)
+
+        #if_if_1
+        onreadystatechangetrigger_if_if_1 = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_1)
+        onreadystatechangetrigger_if_if_1_stmt = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_1_STMT)
+        onreadystatechangetrigger_if_if_1.append(onreadystatechangetrigger_if_if_1_stmt)
+
+        #if_if_2
+        onreadystatechangetrigger_if_if_2 = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_2)
+        onreadystatechangetrigger_if_if_2_stmt = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_2_STMT)
+        onreadystatechangetrigger_if_if_2.append(onreadystatechangetrigger_if_if_2_stmt)
+
+        #add sub if's to main if
+        onreadystatechangetrigger_if_start.append(onreadystatechangetrigger_if_if_1)
+        onreadystatechangetrigger_if_start.append(onreadystatechangetrigger_if_if_2)
+        
+        #add main if to function
+        onreadystatechangetrigger_function.append(onreadystatechangetrigger_if_start)
+        onreadystatechangetrigger_function.append(onreadystatechangetrigger_if_end)
+
+        #add function to script holder
+        script_holder_element.append(onreadystatechangetrigger_function)
+
+        return script_holder_element

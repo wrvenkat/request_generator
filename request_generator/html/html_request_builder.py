@@ -8,6 +8,8 @@ from request_parser.http.constants import MetaDict
 from js_statements_template import *
 from xhr_js_template import *
 import dom.simple_html_elements as HTMLDocument
+from request_generator.request_builder import RequestBuilder
+from request_generator.builders import *
 
 class UnsupportedFormMethodException(Exception):
     """
@@ -23,76 +25,53 @@ class UnsupportedContentTypeException(Exception):
     """
     pass
 
-class SimpleCSRFDOMBuilder():
-    """
-    Builds an HTML DOM from a request_parser.http.request object.
-    """
-
-    class Type():
-        form_request    = 0        
-        xhr_request     = 1
-    
-    class TargetType():
+class TargetType():
         iframe      = 0
         new_tab     = 1
         same_page   = 2
-    
-    def __init__(self, http_requests=[]):
-        """
-        Accepts an array of HttpRequest objects.
-        """
-        if http_requests is not None and\
-            len(http_requests) < 1:
-            #not isinstance(http_requests, HttpRequest):
-            raise ValueError("SimpleHTMLDOMBuilder(): requires at least 1 HttpRequest object")
-        
-        for http_request in http_requests:
-            if not isinstance(http_request, HttpRequest):
-                raise TypeError("SimpleHTMLDOMBuilder(): requires an array of HttpRequest objects.")
 
-        #initialize state variables
-        self.http_requests = http_requests
-        #holds the DOM for the request
-        self.html_request = None
+class HtmlRequestBuilder(RequestBuilder):
+    """
+    Builds an HTML DOM from a request_parser.http.request object.
+    """    
     
-    def build_CSRF_POC(self, type=Type.form_request, target_type=TargetType.iframe,auto_submit=False):
-        """
-        Build bootstrap method.
-        """
-
-        if self.http_requests is None:
-            self.html_request = None
-            return None
+    def __init__(self, requests=[]):
+        super(HtmlRequestBuilder, self).__init__(requests=requests)
+    
+    def build(self, type=Type.form_request, target_type=TargetType.iframe,
+              auto_submit=False):        
+        html_dom = None
+        if type == Type.form_request:
+            html_dom = self.build_form_request(target_type=target_type, auto_submit=auto_submit)
+        elif type == Type.xhr_request:
+            html_dom = self.build_XHR_request(target_type=target_type, auto_submit=auto_submit)
         
-        if type == self.Type.form_request:
-            self.html_request = self.build_form_request(target_type=target_type, auto_submit=auto_submit)
-        elif type == self.Type.xhr_request:
-            self.html_request = self.build_XHR_request(auto_submit=auto_submit)
-        return self.html_request
-    
+        self.request_dom = html_dom
+
     def generate(self):
         """
         Returns the generated code for self.request_html.
         """
 
-        if self.html_request is None:
+        if self.request_dom is None:
             return ''
         
-        return self.html_request.generate()
+        return self.request_dom.generate()
 
     def build_form_request(self, target_type=TargetType.iframe, auto_submit=False):
         """
         Builds an HTML DOM for form based request.
         """
         
-        if self.http_requests is None:
+        if self.requests is None:
             return None
 
         #get an HTML DOM
-        html_dom = self._build_CSRF_template_DOM()
+        html_dom = self.build_template_DOM()
         
+        #TODO: Provide new tab as an option too
         #setup the target
-        if target_type == SimpleCSRFDOMBuilder.TargetType.iframe:
+        if target_type == TargetType.iframe:
             iframe_attrs = {
                 'id' : 'iframe0',
                 'name' : 'iframe0'
@@ -101,15 +80,15 @@ class SimpleCSRFDOMBuilder():
             html_dom.body[0].append(iframe)
 
         #create a form for each of the request provided
-        for index, request in enumerate(self.http_requests):
+        for index, request in enumerate(self.requests):
             request_form = self._build_form(id=index, request=request)
 
             target = None
-            if target_type == SimpleCSRFDOMBuilder.TargetType.iframe:
+            if target_type == TargetType.iframe:
                 target = (html_dom.body[0].iframe[0])['id']
-            elif target_type == SimpleCSRFDOMBuilder.TargetType.new_tab:
+            elif target_type == TargetType.new_tab:
                 target = '_blank' 
-            elif target_type == SimpleCSRFDOMBuilder.TargetType.same_page:
+            elif target_type == TargetType.same_page:
                 target = None
             
             if target is not None:
@@ -129,41 +108,47 @@ class SimpleCSRFDOMBuilder():
         
         #set our request object as the one constructed
         return html_dom
-        
-    def build_XHR_request(self, auto_submit=False):
+    
+    def build_XHR_request(self, target_type=TargetType.iframe, auto_submit=False):
         """
         Builds HTML DOM to make XHR request
         """
         
-        if self.http_requests is None:
+        if self.requests is None:
             return None
 
         #get an HTML DOM
-        html_dom = self._build_CSRF_template_DOM()
+        html_dom = self.build_template_DOM()
 
-        #build an iframe to show the responses onto
-        iframe_attrs = {
-            'id' : 'iframe0'
-        }
-        iframe = HTMLDocument.IFrame(attrs=iframe_attrs)
-        html_dom.body[0].append(iframe)
-        #add a BR element
-        html_dom.body[0].append(HTMLDocument.BR())
-        
         #create a script element to which a lot of the XHR
         #related JS code will be added
         xhr_script = HTMLDocument.Script()
         html_dom.body[0].append(xhr_script)
 
-        #iframe reference code
-        iframe_reference_snippet = HTMLDocument.Text(text=IFRAME_REF_STMT_TEXT)
-        xhr_script.append(iframe_reference_snippet)
+        if target_type == TargetType.iframe:
+            #build an iframe to show the responses onto
+            iframe_attrs = {
+                'id' : 'iframe0'
+            }
+            iframe = HTMLDocument.IFrame(attrs=iframe_attrs)
+            html_dom.body[0].append(iframe)
+            #add a BR element
+            html_dom.body[0].append(HTMLDocument.BR())            
+            #xhr_script.append(iframe_reference_snippet)
+        elif target_type == TargetType.new_tab:
+            load_in_new_tab_function_script = self._build_XHR_load_in_new_tab_function()
+            xhr_script.append(load_in_new_tab_function_script)
+            load_in_new_tab_function_script.unwrap()
+            #print xhr_script.generate()
+        #nothing to do if it's the same page for an XHR
+        elif target_type == TargetType.same_page:
+            pass
 
         #createCORSrequest function
         create_xhr_function_script = self._build_create_XHR_function()
 
         #createOnReadyStateChange function
-        create_onreadystatechange_script = self._build_create_onreadystatechange_function()        
+        create_onreadystatechange_script = self._build_create_onreadystatechange_function(target_type=target_type)        
 
         #add the crateCORrequest function
         xhr_script.append(create_xhr_function_script)
@@ -181,7 +166,7 @@ class SimpleCSRFDOMBuilder():
 
         #for each request, build XHR for them
         #and add them to send_XHR_function_header_snippet
-        for index, request in enumerate(self.http_requests):
+        for index, request in enumerate(self.requests):
             self._build_XHR_snippets(parent_script=xhr_script, send_xhr=send_XHR_function_header_snippet,
                                     index=index, request=request)
         
@@ -196,12 +181,33 @@ class SimpleCSRFDOMBuilder():
 
         return html_dom
     
+    @classmethod
+    def build_template_DOM(cls, title=None):
+        """
+        Builds a simple HTML DOM to be used in CSRF.
+        """
+        
+        title_text = ''
+        if title is None or len(title) == 0:
+            title_text = 'Request POC'
+        else:
+            title_text = title
+        
+        html_dom    = HTMLDocument.HTML()
+        html_head   = HTMLDocument.Head(parent=html_dom)
+        html_title  = HTMLDocument.Title(title=title_text, parent=html_head)
+        html_body   = HTMLDocument.Body(parent=html_dom)
+        html_body_title = HTMLDocument.Heading(text=title_text)
+        html_body.append(html_body_title)
+
+        return html_dom
+
     def _build_XHR_snippets(self, parent_script=None, send_xhr=None, index=0, request=None):
         """
-        Builds XHR JS statements that get added onto sendXHR function.
+        Builds XHR statements for a request that get added onto sendXHR function.
 
         Returns a set of Text elements containing JS statements required
-        to make that XHR request.
+        to make that represent a request.
         """        
 
         if parent_script is None or send_xhr is None or request is None:
@@ -293,7 +299,7 @@ class SimpleCSRFDOMBuilder():
                                 "'"+Encoder.encode_for_JS_data_values(post_data)+"'")
             else:
                 xhr_send_text = XHR_SEND.format(index, '')
-        timeout_function_text = XHR_SEND_TIMEOUT.format(xhr_send_text, XHR_TIMEOUT * (index+1))
+        timeout_function_text = XHR_SEND_TIMEOUT.format(xhr_send_text, XHR_TIMEOUT * (index))
         timeout_function = HTMLDocument.Text(text=timeout_function_text)
 
         #append to send_xhr
@@ -432,6 +438,12 @@ class SimpleCSRFDOMBuilder():
     def _build_multipart_file_js_snippet(self, file_index = 0, multipart_file=None, xhr=False):
         """
         Builds multipart JS snippet statements.
+
+        Builds statements like,
+        var filex_encoded = 'b64encoded_file_content';
+        var filex_decoded = window.atob(filex_encoded);
+        var filex = getFiles(filex_decoded, '')
+        ....
         """
 
         file_JS_element = None
@@ -533,20 +545,6 @@ class SimpleCSRFDOMBuilder():
             script_snippet.append(snippet_element)
         return script_snippet
 
-    def _build_CSRF_template_DOM(self):
-        """
-        Builds a simple HTML DOM to be used in CSRF.
-        """
-        csrf_title_text = "Enhanced CSRF POC."
-        html_dom    = HTMLDocument.HTML()
-        html_head   = HTMLDocument.Head(parent=html_dom)
-        html_title  = HTMLDocument.Title(title=csrf_title_text, parent=html_head)
-        html_body   = HTMLDocument.Body(parent=html_dom)
-        html_body_title = HTMLDocument.Heading(text=csrf_title_text)
-        html_body.append(html_body_title)
-
-        return html_dom
-
     #TODO: Add only custom headers and not standard headers.
     def _build_XHR_header_JS_snippets(self, xhr_index=0, request=None):
         """
@@ -597,12 +595,9 @@ class SimpleCSRFDOMBuilder():
             return post_data
 
         index = 0
-        for param_name, value in params.items():
-            if index == 0:
-                post_data += '?'
-            
+        for param_name, value in params.items():            
             if index != 0:
-                    post_data += '&'    
+                    post_data += '&'
             post_data += param_name+'='+value
             index += 1
         
@@ -660,7 +655,39 @@ class SimpleCSRFDOMBuilder():
 
         return script_holder_element
 
-    def _build_create_onreadystatechange_function(self):
+    def _build_XHR_load_in_new_tab_function(self):
+        """
+        Build function loadInNewTab(data) function.
+        """
+
+        holder_script = HTMLDocument.Script()
+
+        #create Text elements
+        load_in_new_tab_function = HTMLDocument.Text(text=FUNCTION_LOAD_IN_NEW_TAB_HDR)
+        load_in_new_tab_stmt_1 = HTMLDocument.Text(text=FUNCTION_LOAD_IN_NEW_TAB_1)
+        load_in_new_tab_stmt_2 = HTMLDocument.Text(text=FUNCTION_LOAD_IN_NEW_TAB_2)
+        load_in_new_tab_stmt_3 = HTMLDocument.Text(text=FUNCTION_LOAD_IN_NEW_TAB_3)
+        load_in_new_tab_stmt_4 = HTMLDocument.Text(text=FUNCTION_LOAD_IN_NEW_TAB_4)
+        load_in_new_tab_stmt_5 = HTMLDocument.Text(text=FUNCTION_LOAD_IN_NEW_TAB_5)
+        load_in_new_tab_function_footer = HTMLDocument.Text(text=FUNCTION_LOAD_IN_NEW_TAB_FOOTER)
+
+        #add statements to load_in_new_tab_function
+        load_in_new_tab_function.append(load_in_new_tab_stmt_1)
+        load_in_new_tab_function.append(load_in_new_tab_stmt_2)
+        load_in_new_tab_function.append(load_in_new_tab_stmt_3)
+        load_in_new_tab_function.append(load_in_new_tab_stmt_4)
+        load_in_new_tab_function.append(load_in_new_tab_stmt_5)
+
+        #add to holder script
+        holder_script.append(load_in_new_tab_function)
+        holder_script.append(load_in_new_tab_function_footer)
+
+        #print holder_script.generate()
+
+        #return the holder script
+        return holder_script
+
+    def _build_create_onreadystatechange_function(self, target_type=None):
         """
         Create the onreadystatechangeTrigger() function.
         """
@@ -668,7 +695,10 @@ class SimpleCSRFDOMBuilder():
         script_holder_element = HTMLDocument.Script()
 
         #onreadystatechange trigger
-        onreadystatechangetrigger_function = HTMLDocument.Text(text=CREATE_XHR_FUNCTION_HDR)
+        onreadystatechangetrigger_function = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_HDR)
+
+        #set the data statement
+        onreadystatechangetrigger_function.append(HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_STMT_1))
 
         #if_1
         onreadystatechangetrigger_if_start = HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_START)
@@ -687,6 +717,17 @@ class SimpleCSRFDOMBuilder():
         #add sub if's to main if
         onreadystatechangetrigger_if_start.append(onreadystatechangetrigger_if_if_1)
         onreadystatechangetrigger_if_start.append(onreadystatechangetrigger_if_if_2)
+
+        #set whether iframe or new tab
+        if target_type == TargetType.iframe:
+            #iframe reference code
+            iframe_reference_snippet = HTMLDocument.Text(text=IFRAME_REF_STMT_TEXT)
+            onreadystatechangetrigger_function.append(iframe_reference_snippet)
+            onreadystatechangetrigger_if_start.append(HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_TARGET_STMT_IFRAME))
+        elif target_type == TargetType.new_tab:
+            onreadystatechangetrigger_if_start.append(HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_TARGET_STMT_NEW_TAB))
+        elif target_type == TargetType.same_page:
+            onreadystatechangetrigger_if_start.append(HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_TARGET_STMT_SAME_PAGE))
         
         #add main if to function
         onreadystatechangetrigger_function.append(onreadystatechangetrigger_if_start)
@@ -694,5 +735,6 @@ class SimpleCSRFDOMBuilder():
 
         #add function to script holder
         script_holder_element.append(onreadystatechangetrigger_function)
+        script_holder_element.append(HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_FOOTER))
 
         return script_holder_element

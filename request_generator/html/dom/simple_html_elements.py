@@ -36,7 +36,7 @@ class Button(Element):
             if attrs is None:
                 attrs = {}
 
-        if 'onclick' not in attrs:
+        if 'onclick' not in attrs and len(onclick) > 0:
             attrs['onclick'] = onclick
         
         text_child = Text(text=text)
@@ -55,10 +55,12 @@ class Script(Element):
         javascript = "text/javascript"
         vbscript = "text/vbscript"
 
-    def __init__(self, type=Type.javascript):
-        attrs = {
-            'type' : type
-        }
+    def __init__(self, type=Type.javascript, attrs=None):
+        if attrs is None:
+            attrs = {}
+        
+        attrs['type'] = type
+
         #no encoder for a script tag as it requires that the code be properly
         #set in the DOM and doesn't encode during code generation.
         super(Script, self).__init__('script', attrs=attrs, encoder=None)        

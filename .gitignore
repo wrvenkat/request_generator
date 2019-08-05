@@ -6,7 +6,7 @@
 **/._.DS_Store
 **/__pycache__
 **/request_parser
-**/gen_test_csrf_poc
+**/gen_test_*
 
 *.*~
 *.org

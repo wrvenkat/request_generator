@@ -136,7 +136,7 @@ class JQueryRequestBuilderTests(unittest.TestCase):
         request_file_names = [self.simple_get_request_with_query_string]
 
         #generate file name
-        request_file_name = "c_single_request_get_jquery_form_2"
+        request_file_name = "b_single_request_get_jquery_form_2"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
                                 type=Type.jquery_request,
                                 target_type=TargetType.iframe,
@@ -157,7 +157,7 @@ class JQueryRequestBuilderTests(unittest.TestCase):
     def test_c_single_request_post_jquery_form(self):
         request_file_names = [self.post_request_with_query_string]
 
-        request_file_name = "e_single_request_post_jquery_form_1"
+        request_file_name = "c_single_request_post_jquery_form_1"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
                                 type=Type.jquery_request,
                                 target_type=TargetType.iframe,
@@ -178,7 +178,7 @@ class JQueryRequestBuilderTests(unittest.TestCase):
     def test_d_single_request_post_plain_text_jquery_form(self):
         request_file_names = [self.post_request_plain_text]
         
-        request_file_name = "g_single_request_post_plain_text_jquery_form"
+        request_file_name = "d_single_request_post_plain_text_jquery_form"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
                                 type=Type.jquery_request,
                                 target_type=TargetType.iframe,
@@ -204,7 +204,7 @@ class JQueryRequestBuilderTests(unittest.TestCase):
         
         request_file_names = [self.put_request_multipart_file]
 
-        request_file_name = "i_single_request_multi_part_jquery_form"
+        request_file_name = "e_single_request_multi_part_jquery_form"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
                                 type=Type.jquery_request,
                                 target_type=TargetType.iframe,
@@ -231,7 +231,7 @@ class JQueryRequestBuilderTests(unittest.TestCase):
                                 self.put_request_multipart_file
                             ]
         
-        request_file_name = "k_multi_request_jquery_form"
+        request_file_name = "f_multi_request_jquery_form"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
                                 type=Type.jquery_request,
                                 target_type=TargetType.iframe,

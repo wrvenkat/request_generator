@@ -1,13 +1,21 @@
 # get iframe reference
-# arg 1, arg 2 - iframe id index
 IFRAME_REF_STMT_TEXT    = """var iframe0 = document.getElementById('iframe0');"""
+
+#load response in new tab function
+FUNCTION_LOAD_IN_NEW_TAB_HDR    = """function loadInNewTab(data) {"""
+FUNCTION_LOAD_IN_NEW_TAB_1      = """data = 'data:text/html; charset=utf-8,'+data"""
+FUNCTION_LOAD_IN_NEW_TAB_2      = """var w = window.open('about:blank');"""
+FUNCTION_LOAD_IN_NEW_TAB_3      = """w.document.open();"""
+FUNCTION_LOAD_IN_NEW_TAB_4      = """w.document.write(data);"""
+FUNCTION_LOAD_IN_NEW_TAB_5      = """w.document.close();"""
+FUNCTION_LOAD_IN_NEW_TAB_FOOTER = """}"""
 
 # Creates a compatible XHR request object
 # See https://www.html5rocks.com/en/tutorials/cors/#toc-cross-domain-from-chrome-extensions
 # for more information on the functions/statements below
 CREATE_XHR_FUNCTION_HDR         =   """function createCORSRequest(method, url) {"""
 CREATE_XHR_FUNCTION_STMT_1      =   """var xhr = new XMLHttpRequest();"""
-CREATE_XHR_FUNCTION_IF_1        =   """if ("withCredentials" in xhr) {"""
+CREATE_XHR_FUNCTION_IF_1        =   """if ("withCredentials" in xhr)"""
 CREATE_XHR_FUNCTION_IF_1_STMT_1 =   """// Check if the XMLHttpRequest object has a "withCredentials" property."""
 CREATE_XHR_FUNCTION_IF_1_STMT_2 =   """// "withCredentials" only exists on XMLHTTPRequest2 objects."""
 CREATE_XHR_FUNCTION_IF_1_STMT_3 =   """xhr.open(method, url, true);"""
@@ -25,12 +33,16 @@ CREATE_XHR_FUNCTION_FOOTER      =   """}"""
 
 #xhr onreadystatechange with write to iframe
 XHR_ONREADYSTATECHANGE_FUNCTION_HDR             = """function onreadystatechangeTrigger(xhr) {"""
+XHR_ONREADYSTATECHANGE_FUNCTION_STMT_1          = """data = \"data:text/html;charset=utf-8,\""""
 XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_START      = """if (xhr.readyState === xhr.DONE) {"""
 XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_1       = """if (xhr.status === 0)"""
-XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_1_STMT  = """iframe0.src = \"data:text/html;charset=utf-8,\"+'ERROR: Unable to read response status.';"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_1_STMT  = """data = data+'ERROR: Unable to read response status.';"""
 XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_2       = """else"""
-XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_2_STMT  = """iframe0.src = \"data:text/html;charset=utf-8,\"+xhr.responseText;"""
+XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_IF_2_STMT  = """data = data+xhr.responseText;"""
 XHR_ONREADYSTATECHANGE_FUNCTION_IF_1_END        = """}"""
+XHR_ONREADYSTATECHANGE_FUNCTION_TARGET_STMT_IFRAME  = """iframe0.src = data;"""
+XHR_ONREADYSTATECHANGE_FUNCTION_TARGET_STMT_NEW_TAB = """loadInNewTab(data);"""
+XHR_ONREADYSTATECHANGE_FUNCTION_TARGET_STMT_SAME_PAGE = """console.log(data);"""
 XHR_ONREADYSTATECHANGE_FUNCTION_FOOTER          = """}"""
 
 # arg 1, arg 4, arg 5 - xhr object name index, arg 2 - method, arg 3 - URL

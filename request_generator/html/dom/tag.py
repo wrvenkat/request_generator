@@ -209,9 +209,9 @@ class Tag(object):
             raise ValueError("Cannot insert a tag into itself.")
         
         #if a -ve position then insert at head
-        if position and position < 0:
+        if position is not None and position < 0:
             position = 0
-        elif not position:
+        elif position is None:
             position = len(self.contents)
 
         position = min(position, len(self.contents))
@@ -233,18 +233,20 @@ class Tag(object):
         current_child = None
 
         #fix the chain of siblings
-        if len(self.contents):
+        if len(self.contents) > 0:
 
             #insert new_child after
             insert_after = False
 
             #if insert at head
             if position == 0:
-                current_child = self.contents[position]                
+                current_child = self.contents[position]
             #if insert at tail
-            elif position == len(self.contents):
-                current_child = self.contents[len(self.contents)-1]
-                insert_after = True
+            elif position == len(self.contents) or\
+                 position == len(self.contents)-1:
+                 current_child = self.contents[len(self.contents)-1]
+                 if position == len(self.contents):
+                     insert_after = True
             else:
                 current_child = self.contents[position]
 

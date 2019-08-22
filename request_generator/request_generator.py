@@ -2,7 +2,7 @@ from builders import *
 from html.html_request_builder import HtmlRequestBuilder
 from html.jquery.jquery_request_builder import JQueryRequestBuilder
 
-class RequestGenerator():    
+class RequestGenerator():
 
     @classmethod
     def generate_request(cls, requests=None, *args, **kwargs):
@@ -18,7 +18,7 @@ class RequestGenerator():
         elif type == Type.jquery_request:
             builder = JQueryRequestBuilder(requests=requests)
         
-        #build it
+        #build it        
         builder.build(args, kwargs)
     
         #return the generated code

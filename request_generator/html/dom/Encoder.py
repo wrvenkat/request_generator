@@ -222,7 +222,7 @@ class Encoder:
         """
         
         if input is None:
-            raise TypeError("get_UTF8() takes atleast one argument. (0 given)")
+            return ""
 
         try:
             input_length = len(input)

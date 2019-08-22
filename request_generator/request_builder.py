@@ -15,9 +15,9 @@ class RequestBuilder(object):
             #not isinstance(http_requests, HttpRequest):
             raise ValueError("RequestBuilder(): requires at least 1 HttpRequest object")
         
-        for http_request in requests:
-            if not isinstance(http_request, HttpRequest):
-                raise TypeError("RequestBuilder(): requires an array of HttpRequest objects.")
+        #for http_request in requests:
+        #    if not isinstance(http_request, HttpRequest):
+        #        raise TypeError("RequestBuilder(): requires an array of HttpRequest objects.")
 
         #initialize state variables
         self.requests = requests

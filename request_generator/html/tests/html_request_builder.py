@@ -138,7 +138,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         request_file_name = "b_single_request_get_xhr_1"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.iframe,
                                 auto_submit=True)                
         #generate file name
@@ -147,7 +147,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         #newtab
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.new_tab,
                                 auto_submit=True)
         file_name = request_file_name+"_new_tab.html"
@@ -180,7 +180,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         request_file_name = "d_single_request_get_xhr_2"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.iframe,
                                 auto_submit=True)
         
@@ -190,7 +190,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         #newtab
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.new_tab,
                                 auto_submit=True)
         file_name = request_file_name+"_new_tab.html"
@@ -222,7 +222,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         request_file_name = "f_single_request_post_xhr_1"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.iframe,
                                 auto_submit=True)
         
@@ -232,7 +232,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         #newtab
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.new_tab,
                                 auto_submit=True)
         file_name = request_file_name+"_new_tab.html"
@@ -264,7 +264,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         request_file_name = "h_single_request_post_plain_text_xhr"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.iframe,
                                 auto_submit=True)
         
@@ -274,7 +274,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         #newtab
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.new_tab,
                                 auto_submit=True)
         file_name = request_file_name+"_new_tab.html"
@@ -316,7 +316,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
         request_file_names = [self.put_request_multipart_file]
         request_file_name = "j_single_request_multi_part_xhr"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.iframe,
                                 auto_submit=True)
         #generate file name
@@ -325,7 +325,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         #newtab
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.new_tab,
                                 auto_submit=True)
         file_name = request_file_name+"_new_tab.html"
@@ -367,7 +367,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
         
         request_file_name = "l_multi_request_xhr"
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.iframe,
                                 auto_submit=True)
         
@@ -377,7 +377,7 @@ class HtmlRequestBuilderTest(unittest.TestCase):
 
         #newtab
         dom = self.parse_and_build_dom(request_file_names=request_file_names,
-                                type=Type.jquery_request,
+                                type=Type.xhr_request,
                                 target_type=TargetType.new_tab,
                                 auto_submit=True)
         file_name = request_file_name+"_new_tab.html"

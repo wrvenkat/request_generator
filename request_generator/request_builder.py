@@ -24,7 +24,7 @@ class RequestBuilder(object):
         #holds the DOM for the request
         self.request_dom = None
     
-    def build(self, *args, **kwargs):
+    def build(self, type=None, target_type=None, auto_submit=None):
         """
         Entry point into a biulder to triggeer building.
         """

@@ -16,7 +16,7 @@ class JQueryRequestBuilder(HtmlRequestBuilder):
     def __init__(self, requests=[]):
         super(JQueryRequestBuilder, self).__init__(requests=requests)
 
-    def build(self, target_type=TargetType.iframe, auto_submit=False):
+    def build(self, type=1, target_type=TargetType.iframe, auto_submit=False):
         self.request_dom = self.build_ajax_requests(target_type=target_type,
                                                     auto_submit=auto_submit)
 

@@ -580,7 +580,11 @@ class HtmlRequestBuilder(RequestBuilder):
                 continue
             elif header_lower == 'accept-charset':
                 continue
-            elif header_lower == 'cookies':
+            elif header_lower == 'cookies' or header_lower == 'cookie':
+                continue
+            elif header_lower == 'origin':
+                continue
+            elif 'sec-fetch' in header_lower:
                 continue
             
             xhr_header_text = XHR_HDR_STMT_TEXT.format(xhr_index,

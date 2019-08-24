@@ -103,7 +103,7 @@ class HtmlRequestBuilder(RequestBuilder):
             #construct an array of form ids to be used
             for form in html_dom.body[0].form:
                 form_ids.append(form['id'])
-            script_snippet = self._build_auto_submit_JS_snippets(form_ids=form_ids)
+            script_snippet = self._build_form_auto_submit_JS_snippets(form_ids=form_ids)
             html_dom.body[0].append(script_snippet)            
         
         #set our request object as the one constructed
@@ -173,6 +173,11 @@ class HtmlRequestBuilder(RequestBuilder):
         #add the header and footer of sendXHR()
         xhr_script.append(send_XHR_function_header_snippet)
         xhr_script.append(send_XHR_function_footer_snippet)
+
+        if auto_submit:
+            script_holder = self._build_XHR_auto_submit_JS_snippet()
+            xhr_script.append(script_holder)
+            script_holder.unwrap()
 
         #add a click Button
         send_xhr_function_name = SEND_XHR_FUNCTION_NAME+"();"
@@ -524,7 +529,7 @@ class HtmlRequestBuilder(RequestBuilder):
         
         return get_file_script_element
 
-    def _build_auto_submit_JS_snippets(self, form_ids=[], timeout=3):
+    def _build_form_auto_submit_JS_snippets(self, form_ids=[], timeout=3):
         """
         Builds autosubmit JS statements as a Text element to submit
         forms with form_refs as names with a delay of timeout secs 
@@ -736,5 +741,14 @@ class HtmlRequestBuilder(RequestBuilder):
         #add function to script holder
         script_holder_element.append(onreadystatechangetrigger_function)
         script_holder_element.append(HTMLDocument.Text(text=XHR_ONREADYSTATECHANGE_FUNCTION_FOOTER))
+
+        return script_holder_element
+
+    def _build_XHR_auto_submit_JS_snippet(self):
+        script_holder_element = HTMLDocument.Script()
+
+        auto_submit_text = XHR_SEND_TIMEOUT.format(SEND_XHR_FUNCTION_NAME+"()", 2000)
+        auto_submit = HTMLDocument.Text(text=auto_submit_text)
+        script_holder_element.append(auto_submit)
 
         return script_holder_element

@@ -1,13 +1,13 @@
-from dom.Encoder import Encoder
+from .dom.Encoder import Encoder
 from base64 import b64encode
 
 from request_parser.http.request import HttpRequest, QueryDict
 from request_parser.conf.settings import Settings
 from request_parser.http.constants import MetaDict
 
-from js_statements_template import *
-from xhr_js_template import *
-import dom.simple_html_elements as HTMLDocument
+from .js_statements_template import *
+from .xhr_js_template import *
+from .dom import simple_html_elements as HTMLDocument
 from request_generator.request_builder import RequestBuilder
 from request_generator.builders import *
 
@@ -219,14 +219,14 @@ class HtmlRequestBuilder(RequestBuilder):
             return None
 
         #get info about the request
-        method = request.method
+        method = request.method.decode('ascii')
         get_parameters = request.GET
         post_parameters = request.POST
         files = request.FILES
         req_content_type = request.content_type
 
         #get the safe URI with get_parameters
-        action_url = request.get_uri() + self._build_query_string(get_parameters)
+        action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
 
         post_data = None
         # if the content-type is multipart/form-data
@@ -262,7 +262,7 @@ class HtmlRequestBuilder(RequestBuilder):
             
             #build JS statements to add POST params to
             #the formdata object
-            for param_name, value in post_parameters.items():
+            for param_name, value in list(post_parameters.items()):
                 if req_content_type == "multipart/form-data":
                     value = value['data']
                 form_data_param_append_text = FORM_DATA_PARAM_APPEND_TEXT.format(index,
@@ -282,7 +282,7 @@ class HtmlRequestBuilder(RequestBuilder):
             post_data = request.body()
         
         #complete the rest of the statements
-        create_xhr_text_1 = CREATE_XHR_STMT_TEXT_1.format(index, method, action_url)
+        create_xhr_text_1 = CREATE_XHR_STMT_TEXT_1.format(index, method, Encoder.encode_for_JS_data_values(action_url))
         create_xhr_text_2 = CREATE_XHR_STMT_TEXT_2.format(index)
         create_xhr_text_3 = CREATE_XHR_STMT_TEXT_3
         create_xhr_text_4 = CREATE_XHR_STMT_TEXT_4.format(index, index)
@@ -346,7 +346,7 @@ class HtmlRequestBuilder(RequestBuilder):
         
         #build a generic form
         #extract the info needed to construct a form
-        method = request.method
+        method = request.method.decode('ascii')
         get_parameters = request.GET
         post_parameters = request.POST
         req_content_type = request.content_type
@@ -356,7 +356,7 @@ class HtmlRequestBuilder(RequestBuilder):
             raise UnsupportedContentTypeException("{}".format(req_content_type))
                 
         #get the safe URI with get_parameters
-        action_url = request.get_uri() + self._build_query_string(get_parameters)
+        action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
 
         #build the multipart/form-data form
         form_attrs = {
@@ -369,7 +369,7 @@ class HtmlRequestBuilder(RequestBuilder):
         #post_parameters = QueryDict(settings=Settings.default)
         #Add post params and other files as part of the multipart request
         #add all the post_parameters as input elements
-        for param, value in post_parameters.items():
+        for param, value in list(post_parameters.items()):
             if req_content_type == "multipart/form-data":
                 value = value['data']
             input_element = HTMLDocument.Input(name=param, _type=HTMLDocument.Input.Type.hidden, value=value)
@@ -429,7 +429,7 @@ class HtmlRequestBuilder(RequestBuilder):
         query_string = ''
         index = 0
         
-        for key, value in query_dict.items():
+        for key, value in list(query_dict.items()):
             q_string = '{}={}'
             q_string = q_string.format(Encoder.escape_for_url_parameter_value(key), 
                                        Encoder.escape_for_url_parameter_value(value))
@@ -457,6 +457,7 @@ class HtmlRequestBuilder(RequestBuilder):
         
         #create the base64 encoded version of the file contents
         base64_file_content = b64encode(multipart_file.read())
+        base64_file_content = base64_file_content.decode('ascii')
         file_name = multipart_file.name
         content_type = multipart_file.content_type
 
@@ -564,32 +565,32 @@ class HtmlRequestBuilder(RequestBuilder):
         #CAUTION: request_headers is a MultivalueDict and calling
         #.items() returns (key, value) pairs where value is the 
         #last item in the list!
-        for header, value in request_headers.items():
+        for header, value in list(request_headers.items()):
             header_lower = header.lower()
-            if header_lower == 'content-type':
+            if header_lower == b'content-type':
                 continue                
-            elif header_lower == 'user-agent':
+            elif header_lower == b'user-agent':
                 continue
-            elif header_lower == 'host':
+            elif header_lower == b'host':
                 continue
-            elif header_lower == 'content-length':
+            elif header_lower == b'content-length':
                 continue
-            elif header_lower == 'connection':
+            elif header_lower == b'connection':
                 continue
-            elif header_lower == 'accept-encoding':
+            elif header_lower == b'accept-encoding':
                 continue
-            elif header_lower == 'accept-charset':
+            elif header_lower == b'accept-charset':
                 continue
-            elif header_lower == 'cookies' or header_lower == 'cookie':
+            elif header_lower == b'cookies' or header_lower == b'cookie':
                 continue
-            elif header_lower == 'origin':
+            elif header_lower == b'origin':
                 continue
-            elif 'sec-fetch' in header_lower:
+            elif b'sec-fetch' in header_lower:
                 continue
             
             xhr_header_text = XHR_HDR_STMT_TEXT.format(xhr_index,
-                                        Encoder.encode_for_JS_data_values(header),
-                                        Encoder.encode_for_JS_data_values(value))
+                                        Encoder.encode_for_JS_data_values(header.decode('ascii')),
+                                        Encoder.encode_for_JS_data_values(value.decode('ascii')))
             xhr_header = HTMLDocument.Text(text=xhr_header_text)
             xhr_header_statements.append(xhr_header)
 
@@ -604,7 +605,7 @@ class HtmlRequestBuilder(RequestBuilder):
             return post_data
 
         index = 0
-        for param_name, value in params.items():            
+        for param_name, value in list(params.items()):
             if index != 0:
                     post_data += '&'
             post_data += param_name+'='+value

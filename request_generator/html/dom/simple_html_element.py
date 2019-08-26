@@ -1,5 +1,5 @@
-from tag import Tag
-from Encoder import Encoder
+from .tag import Tag
+from .Encoder import Encoder
 
 class SimpleHTMLElement(Tag):
     """
@@ -116,7 +116,7 @@ class SimpleHTMLElement(Tag):
         """
 
         attr_text = ''
-        for attr, attr_value in self.attrs.iteritems():
+        for attr, attr_value in self.attrs.items():
             attr_text += ' '
             attr_name_text = attr
             attr_value_text = attr_value

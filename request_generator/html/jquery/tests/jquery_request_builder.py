@@ -23,8 +23,8 @@ class JQueryRequestBuilderTests(unittest.TestCase):
         cls.post_request_plain_text                 = "post-request-plain-text.txt"
         cls.put_request_multipart_file              = "multi-part-post-request.txt"
 
-        print "Generated HTML files are written inside the '"+GEN_OUTPUT_DIR+\
-                "' directory inside the tests package."
+        print("Generated HTML files are written inside the '"+GEN_OUTPUT_DIR+\
+                "' directory inside the tests package.")
     
     def get_abs_path_file(self, file_name=None):
         if file_name is None or len(file_name) == 0:
@@ -51,7 +51,7 @@ class JQueryRequestBuilderTests(unittest.TestCase):
         for index, request_file_name in enumerate(request_file_names):
             request_file_name = self.get_abs_path_file(request_file_name)
             request_file_names[index] = request_file_name
-            request_stream = open(request_file_name, 'r')
+            request_stream = open(request_file_name, 'rb')
             request_streams.append(request_stream)
         
         #create requests handle for each of the stream

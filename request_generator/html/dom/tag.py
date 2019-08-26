@@ -761,7 +761,7 @@ class Tag(object):
                 result_ = None
                 if tag_attrs is not None:
                     result_ = True
-                    for key, value in attrs.iteritems():
+                    for key, value in attrs.items():
                         if key in tag_attrs and value in tag_attrs[key]:
                             result_ = result_ and True
                         else:

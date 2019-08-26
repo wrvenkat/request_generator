@@ -126,19 +126,19 @@ class SimpleHTMLElementTest(unittest.TestCase):
 
         #assert that the a tag has index 1 (2nd child) of body tag
         body_tag = self.html_tag.contents[1]
-        self.assertEquals(1, body_tag.index(self.ahref1))
+        self.assertEqual(1, body_tag.index(self.ahref1))
 
         #assert that the tag at position 0 is self.iframe1
         #asserts that __eq__ and is_equal() is working
         iframe1 = body_tag.contents[0]
-        self.assertEquals(iframe1, self.iframe1)
+        self.assertEqual(iframe1, self.iframe1)
 
         #assert that iframe's next/next_sibling is ahref
-        self.assertEquals(self.ahref1,iframe1.next)
+        self.assertEqual(self.ahref1,iframe1.next)
 
         #assert that title's previous/previous_sibling of title is meta
         title_tag = self.html_tag.contents[0].contents[2]
-        self.assertEquals(self.meta_desc, title_tag.previous)
+        self.assertEqual(self.meta_desc, title_tag.previous)
 
         #assert that submit input tag's next is None
         self.assertIsNone(self.submit_button.next)
@@ -161,12 +161,12 @@ class SimpleHTMLElementTest(unittest.TestCase):
 
         #assert that the form has been replaced and the neighbourly relations
         #are fine
-        self.assertEquals(self.body_tag.contents[2], get_form)
-        self.assertEquals(self.body_tag.contents[1], get_form.previous)
-        self.assertEquals(get_form, self.body_tag.contents[1].next)
+        self.assertEqual(self.body_tag.contents[2], get_form)
+        self.assertEqual(self.body_tag.contents[1], get_form.previous)
+        self.assertEqual(get_form, self.body_tag.contents[1].next)
 
         #assert that the children are copied over
-        self.assertEquals(get_form.contents[1], self.name_input)
+        self.assertEqual(get_form.contents[1], self.name_input)
  
     def test_c_unwrap(self):
         """
@@ -185,15 +185,15 @@ class SimpleHTMLElementTest(unittest.TestCase):
         #assert that all children of form1 is now part of body
         self.assertEqual(2, self.body_tag.index(self.label1))
         #assert that label1's parent is body
-        self.assertEquals(self.body_tag, self.label1.parent)
+        self.assertEqual(self.body_tag, self.label1.parent)
         #assert that ahref's next is lable1
-        self.assertEquals(self.ahref1.next, self.label1)
+        self.assertEqual(self.ahref1.next, self.label1)
 
         #assert that self.form1 doesn't have a parent, siblings or children
         self.assertIsNone(self.form1.parent)
         self.assertIsNone(self.form1.next)
         self.assertIsNone(self.form1.previous)
-        self.assertEquals(0, len(self.form1.contents))
+        self.assertEqual(0, len(self.form1.contents))
     
     def test_d_wrap_with(self):
         """
@@ -211,16 +211,16 @@ class SimpleHTMLElementTest(unittest.TestCase):
         #print self.html_tag.generate()
 
         #div_tag's child should be self.form1
-        self.assertEquals(div_tag.contents[0], self.form1)
+        self.assertEqual(div_tag.contents[0], self.form1)
         #likewise form1's parent should be div_tag
-        self.assertEquals(div_tag, self.form1.parent)
+        self.assertEqual(div_tag, self.form1.parent)
         #div_tag should also be the third child of body
-        self.assertEquals(self.body_tag.contents[2], div_tag)
+        self.assertEqual(self.body_tag.contents[2], div_tag)
 
         #make sure that the neighbhors of div are also good
         self.assertIsNone(div_tag.next)
-        self.assertEquals(div_tag.previous, self.ahref1)
-        self.assertEquals(div_tag, self.ahref1.next)
+        self.assertEqual(div_tag.previous, self.ahref1)
+        self.assertEqual(div_tag, self.ahref1.next)
 
     def test_e_insert_before(self):
 
@@ -232,10 +232,10 @@ class SimpleHTMLElementTest(unittest.TestCase):
         self.form1.insert_before(form_temp)
 
         #assert the neighbors
-        self.assertEquals(form_temp.next, self.form1)
-        self.assertEquals(self.form1.previous, form_temp)
-        self.assertEquals(len(form_temp.contents), 0)
-        self.assertEquals(form_temp.previous, self.ahref1)
+        self.assertEqual(form_temp.next, self.form1)
+        self.assertEqual(self.form1.previous, form_temp)
+        self.assertEqual(len(form_temp.contents), 0)
+        self.assertEqual(form_temp.previous, self.ahref1)
     
     def test_f_insert_after(self):
 
@@ -248,9 +248,9 @@ class SimpleHTMLElementTest(unittest.TestCase):
 
         #assert the neighbors
         self.assertIsNone(form_temp.next)
-        self.assertEquals(self.form1.next, form_temp)
-        self.assertEquals(len(form_temp.contents), 0)
-        self.assertEquals(form_temp.previous, self.form1)
+        self.assertEqual(self.form1.next, form_temp)
+        self.assertEqual(len(form_temp.contents), 0)
+        self.assertEqual(form_temp.previous, self.form1)
 
     def test_g_siblings(self):
         """
@@ -259,15 +259,15 @@ class SimpleHTMLElementTest(unittest.TestCase):
 
         for i,sibling in enumerate(self.iframe1.next_siblings):
             if i == 0:
-                self.assertEquals(sibling, self.ahref1)
+                self.assertEqual(sibling, self.ahref1)
             if i == 1:
-                self.assertEquals(sibling, self.form1)
+                self.assertEqual(sibling, self.form1)
         
         for i,sibling in enumerate(self.form1.previous_siblings):
             if i == 0:
-                self.assertEquals(sibling, self.ahref1)
+                self.assertEqual(sibling, self.ahref1)
             if i == 1:
-                self.assertEquals(sibling, self.iframe1)
+                self.assertEqual(sibling, self.iframe1)
     
     def test_h_ancestors_descendants(self):
         """
@@ -277,51 +277,51 @@ class SimpleHTMLElementTest(unittest.TestCase):
         #Ancestors
         for i, ancestor in enumerate(self.label2_text.parents):
             if i==0:
-                self.assertEquals(ancestor,self.label2)
+                self.assertEqual(ancestor,self.label2)
             if i==1:
-                self.assertEquals(ancestor,self.form1)
+                self.assertEqual(ancestor,self.form1)
             if i==2:
-                self.assertEquals(ancestor,self.body_tag)
+                self.assertEqual(ancestor,self.body_tag)
             if i==3:
-                self.assertEquals(ancestor,self.html_tag)
+                self.assertEqual(ancestor,self.html_tag)
         
         #descendants just goes through all of the children
         #so a curated list of children is asserted here
         for i,descendant in enumerate(self.body_tag.descendants):
             if i==0:
-                self.assertEquals(descendant,self.iframe1)
+                self.assertEqual(descendant,self.iframe1)
             if i==1:
-                self.assertEquals(descendant,self.ahref1)
+                self.assertEqual(descendant,self.ahref1)
             if i==2:
-                self.assertEquals(descendant,self.a1_text)
+                self.assertEqual(descendant,self.a1_text)
             if i==3:
-                self.assertEquals(descendant,self.form1)
+                self.assertEqual(descendant,self.form1)
             if i==4:
-                self.assertEquals(descendant,self.label1)
+                self.assertEqual(descendant,self.label1)
             if i==5:
-                self.assertEquals(descendant,self.label1_text)
+                self.assertEqual(descendant,self.label1_text)
             if i==6:
-                self.assertEquals(descendant,self.name_input)
+                self.assertEqual(descendant,self.name_input)
             if i==7:
-                self.assertEquals(descendant,self.label2)
+                self.assertEqual(descendant,self.label2)
             if i==8:
-                self.assertEquals(descendant,self.label2_text)
+                self.assertEqual(descendant,self.label2_text)
             if i==9:
-                self.assertEquals(descendant,self.email_input)
+                self.assertEqual(descendant,self.email_input)
             if i==10:
-                self.assertEquals(descendant,self.submit_button)
+                self.assertEqual(descendant,self.submit_button)
 
     def test_i_attribs(self):
         """
         Tests calling tag by name.
         """
         
-        self.assertEquals("500", self.iframe1['height'])
+        self.assertEqual("500", self.iframe1['height'])
         del self.iframe1['width']
         with self.assertRaises(KeyError):
             self.iframe1['width']
         self.iframe1['width'] = 500
-        self.assertEquals(500, self.iframe1['width'])
+        self.assertEqual(500, self.iframe1['width'])
 
     def test_j_misc(self):
         """
@@ -410,6 +410,6 @@ class SimpleHTMLElementTest(unittest.TestCase):
 
     def pretty_print(self):
         pretty_code = self.html_tag.generate()
-        print pretty_code
+        print(pretty_code)
 
 unittest.main()

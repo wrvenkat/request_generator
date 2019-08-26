@@ -6,7 +6,7 @@ from ..xhr_js_template import FORM_DATA_API_TEXT, XHR_FILE_ASSIGNMENT_STMT_1, XH
 from ..html_request_builder import HtmlRequestBuilder, TargetType
 from request_parser.http.request import HttpRequest
 
-from jquery_js_template import *
+from .jquery_js_template import *
 
 class JQueryRequestBuilder(HtmlRequestBuilder):
     """
@@ -144,14 +144,14 @@ class JQueryRequestBuilder(HtmlRequestBuilder):
             return None
 
         #extract the info needed to construct a request
-        method = request.method
+        method = request.method.decode('ascii')
         get_parameters = request.GET
         post_parameters = request.POST
         files = request.FILES
         req_content_type = request.content_type
                 
         #get the safe URI with get_parameters
-        action_url = request.get_uri() + self._build_query_string(get_parameters)
+        action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
 
         post_data = None
         get_file_script = None
@@ -185,7 +185,7 @@ class JQueryRequestBuilder(HtmlRequestBuilder):
             
             #build JS statements to add POST params to
             #the formdata object
-            for param_name, value in post_parameters.items():
+            for param_name, value in list(post_parameters.items()):
                 if req_content_type == "multipart/form-data":
                     value = value['data']
                 form_data_param_append_text = FORM_DATA_PARAM_APPEND_TEXT.format(index,

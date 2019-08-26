@@ -1,6 +1,6 @@
-from builders import *
-from html.html_request_builder import HtmlRequestBuilder
-from html.jquery.jquery_request_builder import JQueryRequestBuilder
+from .builders import *
+from .html.html_request_builder import HtmlRequestBuilder
+from .html.jquery.jquery_request_builder import JQueryRequestBuilder
 
 class RequestGenerator():
 

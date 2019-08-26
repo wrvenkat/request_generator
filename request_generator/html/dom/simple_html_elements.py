@@ -1,4 +1,4 @@
-from simple_html_element import SimpleHTMLElement as Element
+from .simple_html_element import SimpleHTMLElement as Element
 
 """
 Class that houses the various HTML Tags/Elements like form, iframe, input, label etc.

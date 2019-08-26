@@ -146,7 +146,7 @@ class Encoder:
                     (char_codepoint >= caps_a_code_point and char_codepoint <= caps_z_code_point) or
                     (char_codepoint >= zero_code_point and char_codepoint <= nine_code_point) and 
                     char_codepoint < 256):
-                    replacement = unicode('\\x{:02X}'.format(char_codepoint))
+                    replacement = str('\\x{:02X}'.format(char_codepoint))
 
             encoded_output += replacement
        
@@ -197,7 +197,7 @@ class Encoder:
                     (char_codepoint >= caps_a_code_point and char_codepoint <= caps_z_code_point) or
                     (char_codepoint >= zero_code_point and char_codepoint <= nine_code_point) and 
                     char_codepoint < 256):
-                    replacement = unicode('%{:02X}'.format(char_codepoint))
+                    replacement = str('%{:02X}'.format(char_codepoint))
 
             encoded_output += replacement
        
@@ -211,7 +211,7 @@ class Encoder:
 
         try:
             codepoint = int(codepoint)
-            return unicode('&#x{:04X};'.format(codepoint))
+            return str('&#x{:04X};'.format(codepoint))
         except ValueError:
             raise TypeError("get_hex_entity(): Requires an input of type int.")    
 
@@ -232,15 +232,14 @@ class Encoder:
             input_length = len(str(input))
         
         if input_length == 0:
-            return u''
+            return ''
             #raise TypeError("get_UTF8() takes atleast one argument. (0 given)")
 
         #if the input is not of UNICODE type,
         #then we transform it to unicode
-        if not isinstance(input, unicode):
-            #convert the input to bytes and
-            #decode that as UTF-8
-            input = bytes(input).decode('UTF-8')
+        if not isinstance(input, str):
+            #convert the input to str
+            input = str(input)
         
         return input
 
@@ -258,7 +257,7 @@ class Encoder:
         if (len(input) > 1):
             raise TypeError("get_code_point() takes exactly one argument. ({} given)".format(len(input)))
 
-        codepoint = unicodedata.normalize('NFC', input)
+        codepoint = unicodedata.normalize('NFC', input)        
         codepoint = ord(input)        
         return codepoint
     

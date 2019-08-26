@@ -10,8 +10,7 @@ class EncoderTest(unittest.TestCase):
         """
         
         #empty input
-        with self.assertRaises(TypeError):
-            Encoder.get_UTF8()
+        self.assertEquals(Encoder.get_UTF8(), '')
 
         #input is an str that's valid in
         #Windows-1252 alphabets

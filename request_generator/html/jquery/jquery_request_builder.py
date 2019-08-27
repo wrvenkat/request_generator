@@ -149,9 +149,13 @@ class JQueryRequestBuilder(HtmlRequestBuilder):
         post_parameters = request.POST
         files = request.FILES
         req_content_type = request.content_type
-                
+                        
         #get the safe URI with get_parameters
-        action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
+        a = request.get_uri().decode('ascii')
+        b = self._build_query_string(get_parameters)
+        #get the safe URI with get_parameters
+        #action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
+        action_url = a
 
         post_data = None
         get_file_script = None

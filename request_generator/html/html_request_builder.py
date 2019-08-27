@@ -225,8 +225,11 @@ class HtmlRequestBuilder(RequestBuilder):
         files = request.FILES
         req_content_type = request.content_type
 
+        a = request.get_uri().decode('ascii')
+        b = self._build_query_string(get_parameters)
         #get the safe URI with get_parameters
-        action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
+        #action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
+        action_url = a
 
         post_data = None
         # if the content-type is multipart/form-data
@@ -356,7 +359,11 @@ class HtmlRequestBuilder(RequestBuilder):
             raise UnsupportedContentTypeException("{}".format(req_content_type))
                 
         #get the safe URI with get_parameters
-        action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
+        a = request.get_uri().decode('ascii')
+        b = self._build_query_string(get_parameters)
+        #get the safe URI with get_parameters
+        #action_url = request.get_uri().decode('ascii') + self._build_query_string(get_parameters)
+        action_url = a
 
         #build the multipart/form-data form
         form_attrs = {
@@ -364,7 +371,7 @@ class HtmlRequestBuilder(RequestBuilder):
             'id'        : id,
             'name'      : id
         }
-        form = HTMLDocument.Form(action=action_url, method=method, attrs=form_attrs)
+        form = HTMLDocument.Form(action=Encoder.encode_for_HTML_attrib(action_url), method=method, attrs=form_attrs)
 
         #post_parameters = QueryDict(settings=Settings.default)
         #Add post params and other files as part of the multipart request

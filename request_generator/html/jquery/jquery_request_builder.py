@@ -151,7 +151,7 @@ class JQueryRequestBuilder(HtmlRequestBuilder):
         req_content_type = request.content_type
                 
         #get the safe URI with get_parameters
-        action_url = request.get_uri() + self._build_query_string(get_parameters)
+        action_url = request.get_uri()# + self._build_query_string(get_parameters)
 
         post_data = None
         get_file_script = None

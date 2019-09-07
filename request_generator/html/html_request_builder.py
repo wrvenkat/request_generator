@@ -225,8 +225,11 @@ class HtmlRequestBuilder(RequestBuilder):
         files = request.FILES
         req_content_type = request.content_type
 
-        #get the safe URI with get_parameters
-        action_url = request.get_uri()# + self._build_query_string(get_parameters)
+        #get the safe URI with get_parameters        
+        action_url_1 = ''+request.get_scheme()+'://'+request.get_host()+request.get_path()+self._build_query_string(get_parameters)
+        #print "Action URL: "+action_url_1
+        #action_url =  request.get_uri()#+ self._build_query_string(get_parameters)
+        action_url = action_url_1
 
         post_data = None
         # if the content-type is multipart/form-data
@@ -282,7 +285,7 @@ class HtmlRequestBuilder(RequestBuilder):
             post_data = request.body()
         
         #complete the rest of the statements
-        create_xhr_text_1 = CREATE_XHR_STMT_TEXT_1.format(index, method, Encoder.encode_for_JS_data_values(action_url))
+        create_xhr_text_1 = CREATE_XHR_STMT_TEXT_1.format(index, method, action_url)
         create_xhr_text_2 = CREATE_XHR_STMT_TEXT_2.format(index)
         create_xhr_text_3 = CREATE_XHR_STMT_TEXT_3
         create_xhr_text_4 = CREATE_XHR_STMT_TEXT_4.format(index, index)
@@ -356,7 +359,8 @@ class HtmlRequestBuilder(RequestBuilder):
             raise UnsupportedContentTypeException("{}".format(req_content_type))
                 
         #get the safe URI with get_parameters
-        action_url = request.get_uri()# + self._build_query_string(get_parameters)
+        #action_url = request.get_uri()# + self._build_query_string(get_parameters)
+        action_url = ''+request.get_scheme()+'://'+request.get_host()+request.get_path()+self._build_query_string(get_parameters)
 
         #build the multipart/form-data form
         form_attrs = {
@@ -364,7 +368,7 @@ class HtmlRequestBuilder(RequestBuilder):
             'id'        : id,
             'name'      : id
         }
-        form = HTMLDocument.Form(action=Encoder.encode_for_HTML_attrib(action_url), method=method, attrs=form_attrs)
+        form = HTMLDocument.Form(action=action_url, method=method, attrs=form_attrs)
 
         #post_parameters = QueryDict(settings=Settings.default)
         #Add post params and other files as part of the multipart request

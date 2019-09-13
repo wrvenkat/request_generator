@@ -22,6 +22,8 @@ matrix:
       os: osx
       language: shell
       jdk:
-        - oraclejdk6      
+        - oraclejdk6
+      before_install:
+        - chmod +x .travis/run-jython-tests.sh
       script:
         "./.travis/run-jython-tests.sh"

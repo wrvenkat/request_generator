@@ -4,6 +4,9 @@ matrix:
     - name: "Python 2.7 on Ubuntu 16.04"
       os: precise
       python: 2.7
+      install:
+        - git clone https://github.com/wrvenkat/request_parser.git
+        - mv /Users/travis/build/wrvenkat/request_parser/request_parser /Users/travis/build/wrvenkat/request_generator/
       script:
         - python -m request_generator.html.dom.tests.simple_html_element
         - python -m request_generator.html.tests.html_request_builder
@@ -14,6 +17,8 @@ matrix:
       install:
         - pip install six
         - pip install future
+        - git clone https://github.com/wrvenkat/request_parser.git
+        - mv /Users/travis/build/wrvenkat/request_parser/request_parser /Users/travis/build/wrvenkat/request_generator/
       script:
         - python -m request_generator.html.dom.tests.simple_html_element
         - python -m request_generator.html.tests.html_request_builder

@@ -1,4 +1,4 @@
-from tag import Tag
+from ...dom.tag import Tag
 from Encoder import Encoder
 
 class SimpleHTMLElement(Tag):
@@ -11,7 +11,7 @@ class SimpleHTMLElement(Tag):
     """
     A SimpleHTMLElement Tag has the following properties:
     1. Attributes of an element are represented as dictionaries.
-    2. The 'text' of a Tag is contained in the contents attribute.
+    2. The 'text' of a Tag is contained in the _text attribute.
     3. When generate is called on an Element, the output is generated for 
         the subtree rooted at that Element by an appropriate generator depending
         on the type represented by _type.
@@ -69,7 +69,7 @@ class SimpleHTMLElement(Tag):
         Returns True if the type of an element is "script"
         """
 
-        return self._type == Tag.type.script
+        return self._type == self.type.script
     
     @property
     def string(self):

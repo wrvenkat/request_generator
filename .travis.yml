@@ -6,15 +6,14 @@ matrix:
       python:
         - "3.7"
       before_install:
-        - git clone https://github.com/wrvenkat/request_parser.git
-        - git checkout python3
+        - git clone --branch=python3 https://github.com/wrvenkat/request_parser.git        
         - cp -r request_parser/request_parser .
     - name: "Python 3.7 on OSX"
       os: osx
       osx_image: xcode11
       language: shell
       before_install:
-        - git clone https://github.com/wrvenkat/request_parser.git
+        - git clone --branch=python3 https://github.com/wrvenkat/request_parser.git
         - git checkout python3
         - cp -r request_parser/request_parser .
       script:
@@ -26,7 +25,7 @@ matrix:
       os: windows
       language: shell
       before_install:
-        - git clone https://github.com/wrvenkat/request_parser.git
+        - git clone --branch=python3 https://github.com/wrvenkat/request_parser.git
         - git checkout python3
         - cp -r request_parser/request_parser .        
         - choco install python

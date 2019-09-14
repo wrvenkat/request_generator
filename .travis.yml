@@ -24,6 +24,8 @@ matrix:
       jdk:
         - oraclejdk6
       before_install:
+        - mkdir ~/Downloads/Jython
+        - wget -O ~/Downloads/Jython/jython.jar https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.1/jython-standalone-2.7.1.jar
         - chmod +x .travis/run-jython-tests.sh
       script:
         "./.travis/run-jython-tests.sh"

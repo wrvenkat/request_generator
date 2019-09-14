@@ -22,9 +22,7 @@ matrix:
         - python -m request_generator.html.jquery.tests.jquery_request_builder
     - name: "Jython on OSX"
       os: osx
-      language: shell
-      jdk:
-        - oraclejdk6
+      language: shell      
       before_install:
         - pwd && ls -l
         - mkdir ~/Downloads/Jython

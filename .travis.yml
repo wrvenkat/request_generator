@@ -6,6 +6,7 @@ matrix:
       python: 2.7
       script:
         - python -m request_generator.html.dom.tests.simple_html_element
+        - python -m request_generator.html.dom.tests.simple_html_elements
         - python -m request_generator.html.tests.html_request_builder
         - python -m request_generator.html.jquery.tests.jquery_request_builder        
     - name: "Python 2.7 on OSX"
@@ -16,6 +17,7 @@ matrix:
         - pip install future
       script:
         - python -m request_generator.html.dom.tests.simple_html_element
+        - python -m request_generator.html.dom.tests.simple_html_elements
         - python -m request_generator.html.tests.html_request_builder
         - python -m request_generator.html.jquery.tests.jquery_request_builder
     - name: "Jython on OSX"
@@ -24,8 +26,20 @@ matrix:
       jdk:
         - oraclejdk6
       before_install:
+        - pwd && ls -l
         - mkdir ~/Downloads/Jython
+        - mkdir ~/Downloads/Jython/Lib
         - wget -O ~/Downloads/Jython/jython.jar https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.1/jython-standalone-2.7.1.jar
+        - wget -O ~/Downloads/future.tar.gz https://files.pythonhosted.org/packages/90/52/e20466b85000a181e1e144fd8305caf2cf475e2f9674e797b222f8105f5f/future-0.17.1.tar.gz
+        - wget -O ~/Downloads/six.tar.gz https://files.pythonhosted.org/packages/dd/bf/4138e7bfb757de47d1f4b6994648ec67a51efe58fa907c1e11e350cddfca/six-1.12.0.tar.gz
+        - cd ~/Downloads/
+        - mkdir future
+        - mkdir six
+        - tar -xzf future.tar.gz -C future --strip-components 1 && mv future/src/future/ ~/Downloads/Jython/Lib/
+        - tar -xvzf six.tar.gz -C six --strip-components 1 && mv six/six.py ~/Downloads/Jython/Lib/
+        - cd /Users/travis/build/wrvenkat/request_generator
+        - git clone https://github.com/wrvenkat/request_parser.git
+        - mv request_parser/request_parser ../        
         - chmod +x .travis/run-jython-tests.sh
       script:
         "./.travis/run-jython-tests.sh"

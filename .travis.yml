@@ -9,9 +9,9 @@ matrix:
         - pip install future
         - git clone https://github.com/wrvenkat/request_parser.git
         - mv request_parser/request_parser ../
+        - ls -lR
       script:
-        - python -m request_generator.html.dom.tests.simple_html_element
-        - python -m request_generator.html.dom.tests.simple_html_elements
+        - python -m request_generator.html.dom.tests.simple_html_element        
         - python -m request_generator.html.tests.html_request_builder
         - python -m request_generator.html.jquery.tests.jquery_request_builder        
     - name: "Python 2.7 on OSX"
@@ -24,7 +24,6 @@ matrix:
         - mv request_parser/request_parser ../
       script:
         - python -m request_generator.html.dom.tests.simple_html_element
-        - python -m request_generator.html.dom.tests.simple_html_elements
         - python -m request_generator.html.tests.html_request_builder
         - python -m request_generator.html.jquery.tests.jquery_request_builder
     - name: "Jython on OSX"

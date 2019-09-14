@@ -8,8 +8,7 @@ matrix:
         - pip install six
         - pip install future
         - git clone https://github.com/wrvenkat/request_parser.git
-        - mv request_parser/request_parser ../
-        - ls -lR
+        - cp -r request_parser/request_parser .
       script:
         - python -m request_generator.html.dom.tests.simple_html_element        
         - python -m request_generator.html.tests.html_request_builder
@@ -21,7 +20,7 @@ matrix:
         - pip install six
         - pip install future
         - git clone https://github.com/wrvenkat/request_parser.git
-        - mv request_parser/request_parser ../
+        - cp -r request_parser/request_parser .
       script:
         - python -m request_generator.html.dom.tests.simple_html_element
         - python -m request_generator.html.tests.html_request_builder
@@ -43,7 +42,7 @@ matrix:
         - tar -xvzf six.tar.gz -C six --strip-components 1 && mv six/six.py ~/Downloads/Jython/Lib/
         - cd /Users/travis/build/wrvenkat/request_generator
         - git clone https://github.com/wrvenkat/request_parser.git
-        - mv request_parser/request_parser ../
+        - cp -r request_parser/request_parser .
         - chmod +x .travis/run-jython-tests.sh
       script:
         "./.travis/run-jython-tests.sh"

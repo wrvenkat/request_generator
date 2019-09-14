@@ -1,0 +1,39 @@
+language: python
+matrix:
+  include:
+    - name: "Python 3.7 on Ubuntu 16.04"
+      os: precise
+      python:
+        - "3.7"
+      before_install:
+        - git clone https://github.com/wrvenkat/request_parser.git
+        - git checkout python3
+        - cp -r request_parser/request_parser .
+    - name: "Python 3.7 on OSX"
+      os: osx
+      osx_image: xcode11
+      language: shell
+      before_install:
+        - git clone https://github.com/wrvenkat/request_parser.git
+        - git checkout python3
+        - cp -r request_parser/request_parser .
+      script:
+        - python3 -m request_generator.html.dom.tests.simple_html_element
+        - python3 -m request_generator.html.dom.tests.simple_html_elements
+        - python3 -m request_generator.html.tests.html_request_builder
+        - python3 -m request_generator.html.jquery.tests.jquery_request_builder
+    - name: "Python 3.7 on Windows"
+      os: windows
+      language: shell
+      before_install:
+        - git clone https://github.com/wrvenkat/request_parser.git
+        - git checkout python3
+        - cp -r request_parser/request_parser .        
+        - choco install python
+        - python -m pip install --upgrade pip
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+script:
+  - python -m request_generator.html.dom.tests.simple_html_element
+  - python -m request_generator.html.dom.tests.simple_html_elements
+  - python -m request_generator.html.tests.html_request_builder
+  - python -m request_generator.html.jquery.tests.jquery_request_builder

@@ -69,7 +69,7 @@ class HtmlRequestBuilder(RequestBuilder):
         #get an HTML DOM
         html_dom = self.build_template_DOM()
         
-        #TODO: Provide new tab as an option too
+        #DONE: Provide new tab as an option too
         #setup the target
         if target_type == TargetType.iframe:
             iframe_attrs = {
@@ -322,11 +322,12 @@ class HtmlRequestBuilder(RequestBuilder):
     
         #then set the content-type header and other
         #custom headers
-        xhr_content_type_hdr_text = XHR_HDR_STMT_TEXT.format(index,
-                                        'Content-Type',
-                                        Encoder.encode_for_JS_data_values(req_content_type))
-        xhr_content_type_hdr = HTMLDocument.Text(text=xhr_content_type_hdr_text)
-        send_xhr.append(xhr_content_type_hdr)
+        if req_content_type is not None and req_content_type:
+            xhr_content_type_hdr_text = XHR_HDR_STMT_TEXT.format(index,
+                                            'Content-Type',
+                                            Encoder.encode_for_JS_data_values(req_content_type))
+            xhr_content_type_hdr = HTMLDocument.Text(text=xhr_content_type_hdr_text)
+            send_xhr.append(xhr_content_type_hdr)
         
         for header_statements in self._build_XHR_header_JS_snippets(xhr_index=index,
                                                                 request=request):

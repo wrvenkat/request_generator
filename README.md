@@ -5,7 +5,7 @@ request_parser builds object tree and generate code from it for specific languag
 
 ## Details
 ### DOM
-A basic unit in an object tree is a `Tag` object defined in the module `tag.py` under the `dom` package. A `Tag` object can be used to define a building unit for any object model. For example, this might be a statement in a programming language like Java or Python or an HTML element.  
+A basic unit in an object tree is a `Tag` object defined in the `tag` module under the `dom` package. A `Tag` object can be used to define a building unit for any object model. For example, this might be a statement in a programming language like Java or Python or an HTML element.  
 
 The `Tag` class defines basic navigation, search, modification and code generation methods for an object tree.
 

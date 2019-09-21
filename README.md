@@ -1,5 +1,6 @@
 # request_generator
-**request_parser** is an object tree builder and code generator for raw HTTP requests.  
+request_parser is an object tree builder and code generator for raw HTTP requests.  
+
 request_parser builds object tree for specific languages/frameworks like HTML form, jQuery or XHR to generate code from it. The tree is built from an [`HttpRequest`](https://github.com/wrvenkat/request_parser) object.
 
 ## Details

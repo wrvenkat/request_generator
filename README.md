@@ -9,7 +9,7 @@ A basic unit in an object tree is a `Tag` object defined in the module `tag.py` 
 
 The `Tag` class defines basic navigation, search, modification and code generation methods for an object tree.
 
-Specializations and extensions of a `Tag` is possible by inherting to change the behavior. Examples of these are the `simple_html_element.py` and `simple_html_elements.py` modules that extend and specialize `Tag` for generating an HTML element object tree.
+Specializations and extensions of a `Tag` is possible by inherting it o change the behavior. The `SimpleHTMLElement` from [`simple_html_element`](https://github.com/wrvenkat/request_generator/blob/master/request_generator/html/dom/simple_html_element.py) for example forms the generalized basic unit in an HTML object tree. This `SimpleHTMLElement` is further customized in [`simple_html_elements`](https://github.com/wrvenkat/request_generator/blob/master/request_generator/html/dom/simple_html_elements.py) module to create other HTML elements like `IFrame`, `Img`, `Input` etc that make up an HTML object tree.
 
 ### builders
 The [`builders`](https://github.com/wrvenkat/request_generator/blob/master/request_generator/builders.py) module enumerates the available build types in the `Type` class.

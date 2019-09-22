@@ -126,4 +126,4 @@ jquery_code = jquery_builder.generate()
 ```
 
 #### Encoder
-The `html.dom` package has an `Encoder` class that implements to help with proper output encoding during HTML/JS object tree building to prevent context escaping in generated code.
+The `html.dom` package has an `Encoder` class that implements encoding methods based on [OWASP's XSS Prevention Cheatsheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md) to help with proper output encoding during HTML/JS object tree building. This helps prevent context escaping in generated code.

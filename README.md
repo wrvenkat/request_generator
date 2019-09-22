@@ -6,7 +6,7 @@ request_parser builds an object tree and generates code from it for specific lan
 ## Getting Started
 To use request_generator, make sure to have [request_parser](https://github.com/wrvenkat/request_parser) installed or present in `PYTHONPATH`.
 
-Clone the request_generator repository and use it as follows,  
+`git clone`the repository and copy the library directory request_generator to a location that is present in `PYTHONPATH` or copy somewhere and add that location to `PYTHONPATH` and use it as follows,  
 ```python
 from io import BytesIO
 

@@ -24,13 +24,13 @@ class RequestBuilder(object):
         #holds the DOM for the request
         self.request_dom = None
     
-    def build(self, type=None, target_type=None, auto_submit=None):
+    def build(self, *args, **kwargs):
         """
         Entry point into a biulder to triggeer building.
         """
         pass
     
-    def generate(self):
+    def generate(self, *args, **kwargs):
         """
         Code generation trigger method.
         """

@@ -49,7 +49,7 @@ def parse_and_build(requests=None):
 ### dom
 A basic unit in an object tree is a `Tag` object defined in the `tag` module under the `dom` package. A `Tag` object can be used to define a building unit for any type of object tree. For example, this might be a statement in a programming language like Java or Python or an HTML element.  
 
-`Tag` class defines basic navigation, search, modification and code generation methods for an object tree.
+`Tag` class defines basic navigation, search, modification and code generation methods for an object tree. This `Tag` class is created by forking [beautifulsoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)'s [`PageElement`](https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/bs4/element.py).
 
 Specializations and extensions of a `Tag` is possible by inherting it to change the behavior. The `SimpleHTMLElement` from [`simple_html_element`](https://github.com/wrvenkat/request_generator/blob/master/request_generator/html/dom/simple_html_element.py) for example, forms the basic unit in an HTML object tree. This `SimpleHTMLElement` is further customized in [`simple_html_elements`](https://github.com/wrvenkat/request_generator/blob/master/request_generator/html/dom/simple_html_elements.py) module to create other HTML elements like `IFrame`, `Img`, `Input` etc that make up an HTML object tree.
 

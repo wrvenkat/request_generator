@@ -87,6 +87,10 @@ The `utils.utils` module contains the function `get_abs_path(*dirs)` which retur
 ### HTML and jQuery
 #### HTML form request and XHR request
 `html.html_request_builder` module defines the `HtmlRequestBuilder` class. This class implements the `RequestBuilder` interface for a builder-generator for form-based and XHR based HTML code. These two types are listed in the `Type` as `form_request = 0` and `xhr_request = 1`.  
+|     |             |
+| -------------        |-------------
+|`build(type=Type.form_request, target_type=TargetType.iframe, auto_submit=False)`             | `type`, the request type - form based request (`Type.form_request`) and XHR based request (`Type.xhr_request`)<br>`target_type`, where responses should be loaded - iframe (`TargetType.iframe`) and new tab (`TargetType.new_tab`)<br>`auto_submit`, when `True` generate JavaScript code to submit requests when page is loaded
+|`generate()`      | generate code from the object tree built
 
 **Usage**
 ```python
@@ -101,6 +105,10 @@ html_code = html_builder.generate()
 
 #### jQuery request
 `html.jquery.jquery_request_builder` module defines the `JQueryRequestBuilder` class. This class inherits `HtmlRequestBuilder` for a builder-generator for jQuery based HTML code. This type is listed in the `Type` as `jquery_request = 2`.  
+|     |             |
+| -------------        |-------------
+|`build(target_type=TargetType.iframe, auto_submit=False)`             | `target_type`, where responses should be loaded - iframe (`TargetType.iframe`) and new tab (`TargetType.new_tab`)<br>`auto_submit`, when `True` generate JavaScript code to submit requests when page is loaded
+|`generate()`      | generate code from the object tree built
 
 **Usage**
 ```python
@@ -108,7 +116,7 @@ html_code = html_builder.generate()
 jquery_builder = JQueryRequestBuilder(requests=http_requests)
 # build object tree for from-based request and target as iframe with auto submit to true
 # TargetType.new_tab for loading responses in new tab
-jquery_builder.build(type=Type.form_request, target_type=TargetType.iframe, auto_submit=auto_submit)
+jquery_builder.build(target_type=TargetType.iframe, auto_submit=auto_submit)
 # generate code
 jquery_code = jquery_builder.generate()
 ```

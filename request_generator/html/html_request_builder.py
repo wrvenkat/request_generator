@@ -39,7 +39,7 @@ class HtmlRequestBuilder(RequestBuilder):
         super(HtmlRequestBuilder, self).__init__(requests=requests)
     
     def build(self, type=Type.form_request, target_type=TargetType.iframe,
-              auto_submit=False):        
+              auto_submit=False):
         html_dom = None
         if type == Type.form_request:
             html_dom = self.build_form_request(target_type=target_type, auto_submit=auto_submit)

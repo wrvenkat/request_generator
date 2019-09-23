@@ -1,12 +1,12 @@
 # request_generator&nbsp;&nbsp;[![Build Status](https://travis-ci.org/wrvenkat/request_generator.svg?branch=master)](https://travis-ci.org/wrvenkat/request_generator)
-request_parser is an object tree builder and code generator for raw HTTP requests.  
+request_generator is an object tree builder and code generator for raw HTTP requests.  
 
-request_parser builds an object tree and generates code from it for specific languages/frameworks like HTML form, jQuery or XHR. The tree is built using an [`HttpRequest`](https://github.com/wrvenkat/request_parser) object.
+request_generator builds an object tree and generates code from it for specific languages/frameworks like HTML form, jQuery or XHR. The tree is built using an [`HttpRequest`](https://github.com/wrvenkat/request_parser) object.
 
 ## Getting Started
 To use request_generator, make sure to have [request_parser](https://github.com/wrvenkat/request_parser) installed or present in `PYTHONPATH`.
 
-`git clone` the repository and copy the library directory request_generator to a location that is present in `PYTHONPATH` or copy somewhere and add that location to `PYTHONPATH` and use it as follows and use it as follows,  
+`git clone` the repository and copy the library directory request_generator to a location that is present in `PYTHONPATH` or copy somewhere and add that location to `PYTHONPATH` and use it as follows,  
 ```python
 from io import BytesIO
 

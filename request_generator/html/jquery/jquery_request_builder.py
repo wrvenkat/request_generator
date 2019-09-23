@@ -310,9 +310,9 @@ class JQueryRequestBuilder(HtmlRequestBuilder):
 
         holder_script = HTMLDocument.Script()
         
-        url_text = AJAX_REQUEST_URL_STMT.format(index, Encoder.encode_for_JS_data_values(url))
-        method_text = AJAX_REQUEST_METHOD_STMT.format(index, Encoder.encode_for_JS_data_values(method))
-        content_type_text = AJAX_REQUEST_CONTENT_TYPE_STMT.format(index, Encoder.encode_for_JS_data_values(content_type))
+        url_text = AJAX_REQUEST_URL_STMT.format(index, url)
+        method_text = AJAX_REQUEST_METHOD_STMT.format(index, method)
+        content_type_text = AJAX_REQUEST_CONTENT_TYPE_STMT.format(index, content_type)
         data_text = ''
         if not data_obj:
             if data is None:
